@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍓 フルーツファーム</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+  background: #0f0f14;
+  color: #e8e4f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 1.2s;
+}
+:root {
+  --f-card:  #22223a;
+  --f-border:#333356;
+  --f-acc:   #ff6b6b;
+  --f-acc2:  #ffd93d;
+  --f-text:  #e8e4f0;
+  --f-muted: #8885aa;
+  --f-glow:  rgba(255,107,107,0.15);
+}
+#bg-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 12px; }
+
+#header {
+  background: var(--f-card); border: 1px solid var(--f-border); border-radius: 16px;
+  padding: 14px 18px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  backdrop-filter: blur(6px);
+}
+#fruit-stage { display: flex; align-items: center; gap: 12px; }
+#stage-icon { font-size: 36px; line-height: 1; filter: drop-shadow(0 0 10px var(--f-acc)); transition: all 0.5s; }
+#stage-name { font-size: 19px; font-weight: 700; color: var(--f-acc); transition: color 0.5s; }
+#stage-sub  { font-size: 12px; color: var(--f-muted); margin-top: 2px; }
+.stats-row  { display: flex; gap: 8px; flex-wrap: wrap; }
+.stat-pill  { background: rgba(24,24,44,0.8); border: 1px solid var(--f-border); border-radius: 99px; padding: 5px 13px; font-size: 12px; color: var(--f-muted); }
+.stat-pill strong { color: var(--f-text); font-size: 14px; font-weight: 600; }
+
+#main { display: grid; grid-template-columns: 1fr 310px; gap: 10px; }
+@media(max-width:620px){ #main{grid-template-columns:1fr} }
+#left,#right { display: flex; flex-direction: column; gap: 10px; }
+
+.card { background: rgba(34,34,58,0.85); border: 1px solid var(--f-border); border-radius: 14px; padding: 14px 16px; backdrop-filter: blur(4px); }
+.card-title { font-size: 13px; font-weight: 600; color: var(--f-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+/* クリックゾーン */
+#click-zone { text-align: center; cursor: pointer; user-select: none; -webkit-user-select: none; padding: 20px 16px; }
+#fruit-btn-wrap { position: relative; display: inline-block; margin: 0 0 8px; }
+#fruit-btn {
+  width: 130px; height: 130px; border-radius: 50%;
+  background: linear-gradient(135deg,#ff9a9a,#ff4466);
+  border: none; font-size: 62px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform 0.07s, box-shadow 0.3s;
+  box-shadow: 0 0 32px var(--f-glow), 0 4px 16px rgba(0,0,0,0.5);
+  user-select: none; pointer-events: none;
+}
+#click-zone.pressing #fruit-btn { transform: scale(0.88); }
+#click-label { font-size: 12px; color: var(--f-muted); margin-top: 4px; }
+#click-power { font-size: 17px; font-weight: 700; color: var(--f-acc); margin-top: 3px; }
+#money-big { font-size: 28px; font-weight: 800; color: var(--f-text); margin-top: 10px; letter-spacing: -0.02em; }
+#money-sub { font-size: 12px; color: var(--f-muted); margin-top: 2px; }
+
+/* プレステージ */
+#prest-card { border-color: #534488; background: rgba(26,21,48,0.9); display: none; }
+#prest-card.visible { display: block; }
+#prest-card .card-title { color: #9977cc; }
+#prest-progress { background: #12101e; border-radius: 99px; height: 8px; margin: 6px 0 10px; overflow: hidden; }
+#prest-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg,#6644bb,#9966ff); transition: width 0.4s; width: 0%; }
+#prest-info { font-size: 12px; color: #8877aa; margin-bottom: 10px; }
+#prest-btn {
+  width: 100%; padding: 12px; border-radius: 10px;
+  background: linear-gradient(135deg,#6644bb,#9966ff);
+  border: none; color: #e8d8ff; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+}
+#prest-btn:disabled { opacity: 0.28; cursor: not-allowed; background: #333; color: #666; }
+#prest-btn:not(:disabled):hover { opacity: 0.88; transform: scale(1.01); }
+
+/* ══ アップグレード カードグリッド ══ */
+.upg-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+@media(max-width:500px){ .upg-grid{ grid-template-columns: repeat(2,1fr); } }
+
+.upg-btn {
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #1e1a38 0%, #2a2248 60%, #1a1630 100%);
+  border: 1.5px solid #4a3a7a;
+  border-radius: 14px; padding: 0; cursor: pointer; text-align: center;
+  color: var(--f-text); transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
+  display: flex; flex-direction: column; align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.upg-btn::before {
+  content:''; position:absolute; inset:0; border-radius:14px;
+  background: linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);
+  pointer-events:none;
+}
+.upg-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.03);
+  border-color: #8866cc;
+  box-shadow: 0 6px 20px rgba(120,80,220,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.upg-btn:active:not(:disabled){ transform: scale(0.96); }
+.upg-btn:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* 購入可能時は縁が光る */
+.upg-btn.can-buy {
+  border-color: #aa88ff;
+  box-shadow: 0 0 12px rgba(150,100,255,0.5), 0 2px 8px rgba(0,0,0,0.4);
+  animation: upgPulse 2s ease-in-out infinite;
+}
+@keyframes upgPulse {
+  0%,100%{ box-shadow: 0 0 10px rgba(150,100,255,0.4), 0 2px 8px rgba(0,0,0,0.4); }
+  50%    { box-shadow: 0 0 22px rgba(170,130,255,0.7), 0 2px 8px rgba(0,0,0,0.4); }
+}
+
+.upg-inner { padding: 10px 7px 8px; width:100%; }
+.upg-icon-wrap {
+  width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  background: radial-gradient(circle at 40% 35%, rgba(255,255,255,0.15), rgba(0,0,0,0.3));
+  border: 1.5px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1);
+  position: relative; overflow: hidden;
+}
+.upg-icon-wrap::after {
+  content:''; position:absolute; top:4px; left:10px; width:14px; height:6px;
+  background: rgba(255,255,255,0.25); border-radius: 50%; transform: rotate(-30deg);
+  pointer-events:none;
+}
+.upg-type-badge {
+  position: absolute; top: 5px; right: 5px; font-size: 9px; font-weight: 700;
+  padding: 2px 5px; border-radius: 99px; line-height: 1;
+}
+.upg-type-click { background: rgba(255,107,107,0.25); color: #ff9999; border: 1px solid rgba(255,107,107,0.4); }
+.upg-type-all   { background: rgba(100,200,100,0.2);  color: #88ee88; border: 1px solid rgba(100,200,100,0.4); }
+
+.upg-name { font-size: 11px; font-weight: 700; color: #ddd; line-height: 1.3; margin-bottom: 4px; }
+.upg-desc { font-size: 11px; font-weight: 800; color: var(--f-acc2); margin-bottom: 5px; }
+.upg-cost {
+  font-size: 10px; color: #aaa; background: rgba(0,0,0,0.3); border-radius: 99px;
+  padding: 2px 8px; display: inline-block;
+}
+
+/* ══ 施設 カードグリッド ══ */
+#shop-items {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  max-height: none; overflow: visible;
+}
+@media(max-width:500px){ #shop-items{ grid-template-columns: repeat(2,1fr); } }
+
+.shop-item {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0; border-radius: 16px; cursor: pointer;
+  border: 1.5px solid #5a4a1a;
+  background: linear-gradient(160deg,#2a2010 0%,#1e1800 60%,#2a1e08 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,200,50,0.08);
+  transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
+  user-select: none; -webkit-user-select: none;
+}
+.shop-item::before {
+  content:''; position:absolute; inset:0; border-radius:16px;
+  background: linear-gradient(135deg,rgba(255,200,50,0.07) 0%,transparent 55%);
+  pointer-events:none;
+}
+.shop-item:hover:not(.cant) {
+  transform: translateY(-2px) scale(1.03);
+  border-color: #c8a840;
+  box-shadow: 0 6px 20px rgba(200,168,64,0.35), inset 0 1px 0 rgba(255,200,50,0.15);
+}
+.shop-item:active:not(.cant){ transform: scale(0.95); }
+.shop-item.cant { opacity: 0.38; cursor: default; filter: grayscale(0.4); }
+.shop-item.cant:hover { transform: none; box-shadow: none; }
+
+/* 購入可能なら金縁が光る */
+.shop-item.can-buy {
+  border-color: #e8c84a;
+  animation: shopPulse 1.8s ease-in-out infinite;
+}
+@keyframes shopPulse {
+  0%,100%{ box-shadow: 0 0 8px rgba(230,200,60,0.35), 0 2px 8px rgba(0,0,0,0.5); }
+  50%    { box-shadow: 0 0 18px rgba(255,220,80,0.6), 0 2px 8px rgba(0,0,0,0.5); }
+}
+
+.shop-inner { padding: 10px 6px 8px; width:100%; display:flex; flex-direction:column; align-items:center; }
+
+.shop-ico-wrap {
+  width: 60px; height: 60px; border-radius: 50%; margin-bottom: 7px;
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+  background: radial-gradient(circle at 40% 35%, rgba(255,220,80,0.18), rgba(0,0,0,0.5));
+  border: 1.5px solid rgba(255,200,50,0.2);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,200,50,0.15);
+  position: relative; overflow: hidden;
+}
+.shop-ico-wrap::after {
+  content:''; position:absolute; top:5px; left:12px; width:16px; height:7px;
+  background: rgba(255,255,255,0.22); border-radius: 50%; transform: rotate(-30deg);
+  pointer-events:none;
+}
+.shop-name { font-size: 11px; font-weight: 700; color: #ddd; text-align:center; margin-bottom:3px; line-height:1.3; }
+.shop-desc { font-size: 10px; color: #aa9966; margin-bottom: 5px; }
+.shop-cost { font-size: 10px; color: var(--f-acc2); font-weight: 700; margin-bottom: 6px; }
+
+/* 所持数バッジ */
+.shop-count-badge {
+  position: absolute; top: 6px; right: 6px;
+  min-width: 24px; height: 24px; border-radius: 99px; padding: 0 6px;
+  background: linear-gradient(135deg,#c8a020,#8a6010);
+  border: 1.5px solid #e8c840;
+  font-size: 12px; font-weight: 800; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+/* 0個なら暗く */
+.shop-item.zero-owned .shop-count-badge {
+  background: rgba(30,30,30,0.8); border-color: #444; color: #666;
+}
+
+/* ps表示バー */
+.shop-ps-bar {
+  width:100%; height:3px; border-radius:99px; margin-top:2px;
+  background: rgba(200,168,64,0.15);
+  overflow: hidden;
+}
+.shop-ps-fill { height:100%; border-radius:99px; background: linear-gradient(90deg,#c8a020,#ffdd44); transition: width 0.4s; }
+
+/* 実績バー（ヘッダー下横スクロール） */
+#ms-bar-wrap {
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+#ms-bar {
+  display: flex; gap: 6px; overflow-x: auto; padding: 6px 2px;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+#ms-bar::-webkit-scrollbar { display: none; }
+.ms-chip {
+  flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  background: rgba(30,30,50,0.9); border: 1px solid #2a2a4a; color: #5a5880;
+  white-space: nowrap; transition: all 0.3s;
+}
+.ms-chip.done {
+  background: linear-gradient(135deg,#0d2a18,#1a4228);
+  border-color: #2a5a38; color: #55cc77;
+  box-shadow: 0 0 8px rgba(85,204,119,0.2);
+}
+.ms-chip .chip-icon { font-size: 13px; }
+
+/* 実績 */
+.ms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; max-height: 210px; overflow-y: auto; }
+.ms-item { font-size: 11px; padding: 5px 8px; border-radius: 8px; background: rgba(20,20,31,0.8); color: var(--f-muted); border: 1px solid #22223a; display: flex; align-items: center; gap: 5px; }
+.ms-item.done { background: rgba(13,42,24,0.9); color: #55cc77; border-color: #2a5a38; }
+
+#rank-badge { display: inline-block; padding: 3px 12px; border-radius: 99px; font-size: 11px; font-weight: 600; background: #22183a; color: #bb88ff; border: 1px solid #44336a; margin-top: 4px; }
+
+.float-text { position: absolute; pointer-events: none; font-size: 16px; font-weight: 800; color: var(--f-acc2); text-shadow: 0 0 10px rgba(255,217,61,0.8); opacity: 1; transition: opacity 0.9s, transform 0.9s; z-index: 99; white-space: nowrap; }
+
+/* 実績通知 */
+#notif-container { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.notif-toast {
+  background: linear-gradient(135deg,#1a3a22,#0d2a18); border: 1px solid #2a5a38; border-radius: 12px;
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px; min-width: 220px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: slideIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  color: #55cc77;
+}
+@keyframes slideIn { 0%{transform:translateX(120%);opacity:0} 100%{transform:translateX(0);opacity:1} }
+.notif-toast.fadeOut { animation: slideOut 0.4s ease forwards; }
+@keyframes slideOut { to{transform:translateX(120%);opacity:0} }
+.notif-icon { font-size: 22px; }
+.notif-text { font-size: 12px; }
+.notif-title { font-weight: 700; font-size: 13px; }
+
+/* 施設カードをスクロールなしで表示 */
+#shop-items { max-height: none; overflow: visible; }
+
+/* 転生オーバーレイ - 豪華版 */
+#prest-overlay {
+  display: none; position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.0);
+  align-items: center; justify-content: center; flex-direction: column; text-align: center;
+  overflow: hidden;
+}
+#prest-overlay.show { display: flex; }
+#prest-overlay.show { animation: prestBgIn 0.5s forwards; }
+@keyframes prestBgIn { to { background: rgba(0,0,0,0.92); } }
+
+#prest-canvas { position: absolute; inset: 0; pointer-events: none; }
+
+#prest-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+
+#prest-big-icon {
+  font-size: 0px; opacity: 0;
+  animation: none;
+  filter: drop-shadow(0 0 40px var(--f-acc));
+}
+#prest-overlay.show #prest-big-icon {
+  animation: iconBurst 0.8s 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes iconBurst {
+  0%  { font-size: 0px; opacity: 0; transform: rotate(-30deg) scale(0); }
+  60% { font-size: 120px; opacity: 1; transform: rotate(5deg) scale(1.15); }
+  100%{ font-size: 100px; opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+#prest-rings {
+  position: absolute; width: 300px; height: 300px;
+  pointer-events: none; top: 50%; left: 50%; transform: translate(-50%,-50%);
+}
+.pring {
+  position: absolute; border-radius: 50%; border: 2px solid var(--f-acc);
+  top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0);
+  opacity: 0;
+}
+#prest-overlay.show .pring { animation: ringExpand 1.2s ease-out forwards; }
+#prest-overlay.show .pring:nth-child(1){ animation-delay: 0.1s; }
+#prest-overlay.show .pring:nth-child(2){ animation-delay: 0.3s; border-color: var(--f-acc2); }
+#prest-overlay.show .pring:nth-child(3){ animation-delay: 0.5s; }
+#prest-overlay.show .pring:nth-child(4){ animation-delay: 0.7s; border-color: var(--f-acc2); }
+@keyframes ringExpand {
+  0%  { width:20px; height:20px; opacity:0.9; transform:translate(-50%,-50%) scale(1); }
+  100%{ width:320px; height:320px; opacity:0; transform:translate(-50%,-50%) scale(1); }
+}
+
+#prest-title {
+  font-size: 0px; font-weight: 800; color: #fff; margin-top: 16px; opacity: 0;
+  text-shadow: 0 0 30px var(--f-acc);
+}
+#prest-overlay.show #prest-title { animation: textReveal 0.5s 0.9s ease forwards; }
+@keyframes textReveal {
+  0%  { font-size: 16px; opacity: 0; transform: translateY(20px); }
+  100%{ font-size: 30px; opacity: 1; transform: translateY(0); }
+}
+
+#prest-sub {
+  font-size: 14px; color: #ccc; margin-top: 8px; max-width: 320px; opacity: 0;
+  line-height: 1.7;
+}
+#prest-overlay.show #prest-sub { animation: textReveal2 0.4s 1.2s ease forwards; }
+@keyframes textReveal2 { to { opacity: 1; } }
+
+#prest-bonus-num {
+  font-size: 48px; font-weight: 900; margin-top: 10px; opacity: 0;
+  background: linear-gradient(135deg, var(--f-acc), var(--f-acc2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+#prest-overlay.show #prest-bonus-num { animation: bonusPop 0.6s 1.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+@keyframes bonusPop { to { opacity: 1; transform: scale(1.1); } from { opacity:0; transform: scale(0.5); } }
+
+#prest-close {
+  margin-top: 28px; padding: 14px 44px; border-radius: 99px;
+  background: linear-gradient(135deg, #6644bb, #9966ff);
+  border: none; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+  opacity: 0; box-shadow: 0 0 24px rgba(150,100,255,0.5);
+  transition: transform 0.1s, opacity 0.2s;
+}
+#prest-overlay.show #prest-close { animation: textReveal2 0.4s 1.8s ease forwards; }
+#prest-close:hover { transform: scale(1.04); }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div id="notif-container"></div>
+
+<div id="prest-overlay">
+  <canvas id="prest-canvas"></canvas>
+  <div id="prest-rings">
+    <div class="pring"></div><div class="pring"></div>
+    <div class="pring"></div><div class="pring"></div>
+  </div>
+  <div id="prest-content">
+    <div id="prest-big-icon">🍓</div>
+    <div id="prest-title">転生！</div>
+    <div id="prest-sub"></div>
+    <div id="prest-bonus-num"></div>
+    <button id="prest-close" onclick="closePrest()">▶ 新しい農場へ</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="header">
+    <div id="fruit-stage">
+      <div id="stage-icon">🍓</div>
+      <div>
+        <div id="stage-name">いちごファーム</div>
+        <div id="stage-sub">プレステージ 0回</div>
+        <div id="rank-badge">見習い農家</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-pill">総生産 <strong id="stat-total">0</strong></div>
+      <div class="stat-pill">毎秒 <strong id="stat-ps">0</strong>💰</div>
+      <div class="stat-pill">転生 <strong id="stat-prest">0</strong>回</div>
+    </div>
+  </div>
+
+  <!-- 実績バー -->
+  <div id="ms-bar-wrap" class="card" style="padding:8px 12px;">
+    <div style="font-size:11px;font-weight:600;color:var(--f-muted);margin-bottom:4px;">🏆 実績</div>
+    <div id="ms-bar"></div>
+  </div>
+
+  <div id="main">
+    <div id="left">
+      <div class="card" id="click-zone">
+        <div id="fruit-btn-wrap">
+          <div id="fruit-btn">🍓</div>
+        </div>
+        <div id="click-label">タップして収穫！</div>
+        <div id="click-power">+1💰 / タップ</div>
+        <div id="money-big">💰 0</div>
+        <div id="money-sub">所持金</div>
+      </div>
+
+      <div class="card" id="prest-card">
+        <div class="card-title">✨ 転生</div>
+        <div id="prest-progress"><div id="prest-bar"></div></div>
+        <div id="prest-info">必要: 💰 1兆</div>
+        <button id="prest-btn" onclick="doPrestige()" disabled>✨ 転生する（ボーナス獲得）</button>
+      </div>
+    </div>
+
+    <div id="right">
+      <div class="card">
+        <div class="card-title">🔧 アップグレード</div>
+        <div class="upg-grid" id="upg-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 施設セクション フル幅 -->
+  <div class="card" style="margin-top:10px;">
+    <div class="card-title">🏪 施設（タップで購入）</div>
+    <div id="shop-items"></div>
+  </div>
+</div>
+
+<script>
+// ── フルーツ定義（背景スタイルを各自持つ） ──
+const FRUITS = [
+  {
+    icon:"🍓", name:"いちごファーム", color:"#ff6b6b", glow:"rgba(255,107,107,0.3)",
+    btn:"linear-gradient(135deg,#ff9a9a,#ff4466)",
+    bg:"#1a0a0e",
+    // 背景: ゆっくり落ちる赤い粒
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      pts.forEach(p=>{
+        p.y += p.s; if(p.y>H+10) p.y=-10;
+        ctx.globalAlpha = p.o * 0.55;
+        ctx.fillStyle = '#ff6b6b';
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ const a=[]; for(let i=0;i<50;i++) a.push({x:Math.random()*W,y:Math.random()*H,r:1.5+Math.random()*3,s:0.4+Math.random()*0.8,o:0.3+Math.random()*0.5}); return a; }
+  },
+  {
+    icon:"🫐", name:"ブルーベリーファーム", color:"#8888ff", glow:"rgba(100,100,255,0.3)",
+    btn:"linear-gradient(135deg,#9999ff,#4444cc)",
+    bg:"#08082a",
+    // 背景: ふわふわ浮かぶ紫の泡
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      pts.forEach(p=>{
+        p.y -= p.s * 0.5; p.x += Math.sin(t*0.001+p.phase)*0.4;
+        if(p.y<-20) p.y=H+20;
+        ctx.globalAlpha = p.o * 0.5;
+        ctx.strokeStyle='#8888ff'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.stroke();
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ const a=[]; for(let i=0;i<60;i++) a.push({x:Math.random()*W,y:Math.random()*H,r:4+Math.random()*12,s:0.3+Math.random()*0.5,o:0.3+Math.random()*0.5,phase:Math.random()*Math.PI*2}); return a; }
+  },
+  {
+    icon:"🍊", name:"みかん農園", color:"#ff9944", glow:"rgba(255,153,68,0.3)",
+    btn:"linear-gradient(135deg,#ffbb44,#ff6600)",
+    bg:"#1a0e00",
+    // 背景: 横に流れる暖色ライン
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      pts.forEach((p,i)=>{
+        const x = (p.x + t*p.s*0.3) % (W+100) - 50;
+        ctx.globalAlpha = p.o * 0.35;
+        ctx.strokeStyle = i%2===0?'#ff9944':'#ffdd00';
+        ctx.lineWidth = p.r;
+        ctx.beginPath(); ctx.moveTo(x, p.y); ctx.lineTo(x+80+p.r*20, p.y); ctx.stroke();
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ const a=[]; for(let i=0;i<35;i++) a.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,s:0.5+Math.random()*1.5,o:0.3+Math.random()*0.5}); return a; }
+  },
+  {
+    icon:"🍇", name:"ぶどう農場", color:"#cc66ff", glow:"rgba(200,100,255,0.35)",
+    btn:"linear-gradient(135deg,#dd88ff,#9933cc)",
+    bg:"#12001a",
+    // 背景: 六角形グリッドが光る
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      const hex=(cx,cy,r,a)=>{
+        ctx.beginPath();
+        for(let i=0;i<6;i++){const ang=Math.PI/3*i; ctx.lineTo(cx+r*Math.cos(ang),cy+r*Math.sin(ang));}
+        ctx.closePath(); ctx.globalAlpha=a; ctx.strokeStyle='#cc66ff'; ctx.lineWidth=0.8; ctx.stroke();
+      };
+      const sz=40, rows=Math.ceil(H/sz)+1, cols=Math.ceil(W/sz)+1;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+        const cx=c*sz*1.5, cy=r*sz+(c%2)*sz*0.87;
+        const pulse=0.15+0.12*Math.sin(t*0.001+r*0.5+c*0.3);
+        hex(cx,cy,18,pulse);
+      }
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ return []; }
+  },
+  {
+    icon:"🍍", name:"パイナップル農場", color:"#ffdd00", glow:"rgba(255,220,0,0.35)",
+    btn:"linear-gradient(135deg,#ffee44,#ffaa00)",
+    bg:"#1a1400",
+    // 背景: 弾ける黄色の火花
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      pts.forEach(p=>{
+        p.life -= 0.012;
+        if(p.life<=0){ p.x=Math.random()*W; p.y=Math.random()*H; p.vx=(Math.random()-0.5)*3; p.vy=-1-Math.random()*2; p.life=0.6+Math.random()*0.8; }
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.04;
+        ctx.globalAlpha=p.life*0.7;
+        ctx.fillStyle=p.life>0.5?'#ffee44':'#ff9900';
+        ctx.fillRect(p.x,p.y,2,2);
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ const a=[]; for(let i=0;i<100;i++) a.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*3,vy:-1-Math.random()*2,life:Math.random()}); return a; }
+  },
+  {
+    icon:"🥭", name:"マンゴーパラダイス", color:"#ff8c00", glow:"rgba(255,140,0,0.4)",
+    btn:"linear-gradient(135deg,#ffaa44,#ff6600)",
+    bg:"#1a0800",
+    // 背景: 大きなオーラリング
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      const cx=W/2, cy=H/2;
+      for(let i=0;i<6;i++){
+        const r=80+i*60+Math.sin(t*0.0008+i)*20;
+        const a=0.08-i*0.008;
+        ctx.globalAlpha=Math.max(0,a);
+        ctx.strokeStyle=i%2===0?'#ff8c00':'#ffcc44';
+        ctx.lineWidth=3-i*0.3;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+      }
+      pts.forEach(p=>{
+        p.angle += p.s*0.008;
+        const r=p.radius+Math.sin(t*0.001+p.phase)*15;
+        const px=cx+Math.cos(p.angle)*r, py=cy+Math.sin(p.angle)*r;
+        ctx.globalAlpha=p.o*0.6; ctx.fillStyle='#ffaa44';
+        ctx.beginPath(); ctx.arc(px,py,p.r,0,Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ const a=[]; for(let i=0;i<30;i++) a.push({angle:Math.random()*Math.PI*2,radius:60+Math.random()*220,s:0.5+Math.random(),r:1.5+Math.random()*3,o:0.3+Math.random()*0.5,phase:Math.random()*Math.PI*2}); return a; }
+  },
+  {
+    icon:"🍑", name:"もも農場", color:"#ff88aa", glow:"rgba(255,136,170,0.4)",
+    btn:"linear-gradient(135deg,#ffaacc,#ff6688)",
+    bg:"#1a0010",
+    // 背景: ピンクのリボン波
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      for(let i=0;i<8;i++){
+        const amp=30+i*12, freq=0.006+i*0.001, speed=t*0.0004*(i%2===0?1:-1), yBase=H/(8)*i+H/16;
+        ctx.beginPath();
+        for(let x=0;x<=W;x+=4){
+          const y=yBase+Math.sin(x*freq+speed)*amp;
+          x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        }
+        ctx.globalAlpha=0.06+i*0.015;
+        ctx.strokeStyle=i%2===0?'#ff88aa':'#ffbbcc';
+        ctx.lineWidth=2; ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ return []; }
+  },
+  {
+    icon:"🌴", name:"ドラゴンフルーツの島", color:"#ff44cc", glow:"rgba(255,68,200,0.5)",
+    btn:"linear-gradient(135deg,#ff88ee,#cc0099)",
+    bg:"#0a001a",
+    // 背景: 回転する電撃オーラ + 粒子
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      const cx=W/2,cy=H/2;
+      // 回転ライン
+      for(let i=0;i<12;i++){
+        const ang=t*0.0006+i*(Math.PI*2/12);
+        const r1=40, r2=120+Math.sin(t*0.002+i)*30;
+        ctx.globalAlpha=0.18;
+        ctx.strokeStyle=i%3===0?'#ff44cc':i%3===1?'#aa00ff':'#ff88ff';
+        ctx.lineWidth=1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx+Math.cos(ang)*r1,cy+Math.sin(ang)*r1);
+        ctx.lineTo(cx+Math.cos(ang)*r2,cy+Math.sin(ang)*r2);
+        ctx.stroke();
+      }
+      // 降り注ぐ粒子
+      pts.forEach(p=>{
+        p.y+=p.s; if(p.y>H+10) { p.y=-10; p.x=Math.random()*W; }
+        ctx.globalAlpha=p.o*0.7;
+        ctx.fillStyle=Math.random()>0.5?'#ff44cc':'#ff88ff';
+        ctx.fillRect(p.x,p.y,1.5,p.r*2);
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){ const a=[]; for(let i=0;i<80;i++) a.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,s:1+Math.random()*2,o:0.3+Math.random()*0.5}); return a; }
+  },
+  {
+    icon:"⭐", name:"スター・フルーツ宇宙農場", color:"#ffe066", glow:"rgba(255,220,80,0.6)",
+    btn:"linear-gradient(135deg,#ffffcc,#ffdd00)",
+    bg:"#000008",
+    // 背景: 完全に豪華！オーロラ + 流れ星 + 爆発パーティクル
+    drawBg(ctx,W,H,pts,t){
+      ctx.clearRect(0,0,W,H);
+      // オーロラ帯
+      for(let i=0;i<5;i++){
+        const y=H*0.3+i*H*0.12;
+        const grd=ctx.createLinearGradient(0,y-60,0,y+60);
+        const hue=200+i*30+(t*0.01)%360;
+        grd.addColorStop(0,'transparent');
+        grd.addColorStop(0.5,`hsla(${hue},100%,60%,0.08)`);
+        grd.addColorStop(1,'transparent');
+        ctx.fillStyle=grd;
+        ctx.beginPath();
+        for(let x=0;x<=W;x+=8){
+          const dy=Math.sin(x*0.005+t*0.001+i)*40;
+          x===0?ctx.moveTo(x,y+dy):ctx.lineTo(x,y+dy);
+        }
+        ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+        ctx.fill();
+      }
+      // 星の海
+      pts.forEach(p=>{
+        if(p.type==='star'){
+          const twinkle=0.4+0.6*Math.sin(t*0.002*p.speed+p.phase);
+          ctx.globalAlpha=twinkle*p.o;
+          ctx.fillStyle='#fff';
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        } else if(p.type==='meteor'){
+          p.x -= p.vx; p.y += p.vy;
+          if(p.x<-50||p.y>H+50){p.x=W+50+Math.random()*200;p.y=-50-Math.random()*100;}
+          ctx.globalAlpha=0.7;
+          ctx.strokeStyle='rgba(255,240,120,0.8)'; ctx.lineWidth=1.5;
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+p.vx*8,p.y-p.vy*8); ctx.stroke();
+        } else if(p.type==='burst'){
+          p.life-=0.008;
+          if(p.life<=0){p.x=Math.random()*W;p.y=Math.random()*H;p.vx=(Math.random()-0.5)*4;p.vy=(Math.random()-0.5)*4;p.life=0.5+Math.random();}
+          p.x+=p.vx*0.5; p.y+=p.vy*0.5;
+          ctx.globalAlpha=p.life*0.8;
+          const hue2=(t*0.05+p.phase*60)%360;
+          ctx.fillStyle=`hsl(${hue2},100%,70%)`;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        }
+      });
+      ctx.globalAlpha=1;
+    },
+    initPts(W,H){
+      const a=[];
+      for(let i=0;i<120;i++) a.push({type:'star',x:Math.random()*W,y:Math.random()*H,r:0.5+Math.random()*1.5,o:0.4+Math.random()*0.6,speed:0.5+Math.random()*2,phase:Math.random()*Math.PI*2});
+      for(let i=0;i<8;i++) a.push({type:'meteor',x:Math.random()*W,y:Math.random()*H,vx:3+Math.random()*4,vy:1+Math.random()*2});
+      for(let i=0;i<60;i++) a.push({type:'burst',x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,r:1+Math.random()*2.5,life:Math.random(),phase:Math.random()*Math.PI*2});
+      return a;
+    }
+  },
+];
+
+const BLDGS = [
+  { name:"🌱 苗",            desc:"0.1/秒",    base:15,    ps:0.1    },
+  { name:"💧 水やり機",       desc:"1/秒",      base:100,   ps:1      },
+  { name:"🏡 農園",          desc:"8/秒",      base:750,   ps:8      },
+  { name:"🚜 農業トラック",    desc:"47/秒",     base:5000,  ps:47     },
+  { name:"🏭 加工工場",       desc:"260/秒",    base:3e4,   ps:260    },
+  { name:"🔬 品種研究所",     desc:"1400/秒",   base:2e5,   ps:1400   },
+  { name:"🌐 グローバル流通",  desc:"7800/秒",   base:1.5e6, ps:7800   },
+  { name:"🛸 宇宙農場",       desc:"44000/秒",  base:1e8,   ps:44000  },
+  { name:"🌌 多次元農業基地", desc:"260000/秒", base:1e11,  ps:260000 },
+];
+
+const UPGRADES = [
+  { id:"u0",  name:"強化された手",     desc:"クリック×2",    cost:50,    type:"click", mul:2    },
+  { id:"u1",  name:"収穫機",           desc:"クリック×5",    cost:500,   type:"click", mul:5    },
+  { id:"u2",  name:"秘伝の肥料",       desc:"全生産×2",     cost:2000,  type:"all",   mul:2    },
+  { id:"u3",  name:"完全自動化",       desc:"クリック×10",   cost:1e4,   type:"click", mul:10   },
+  { id:"u4",  name:"品質保証",         desc:"全生産×3",     cost:5e4,   type:"all",   mul:3    },
+  { id:"u5",  name:"AI農業",           desc:"クリック×25",   cost:5e5,   type:"click", mul:25   },
+  { id:"u6",  name:"量子農法",         desc:"全生産×5",     cost:5e6,   type:"all",   mul:5    },
+  { id:"u7",  name:"宇宙農業",         desc:"全生産×10",    cost:1e9,   type:"all",   mul:10   },
+  { id:"u8",  name:"時間操作",         desc:"クリック×100",  cost:1e10,  type:"click", mul:100  },
+  { id:"u9",  name:"神の農業",         desc:"全生産×20",    cost:1e12,  type:"all",   mul:20   },
+  { id:"u10", name:"魔法の種",         desc:"クリック×3",    cost:150,   type:"click", mul:3    },
+  { id:"u11", name:"太陽光パネル",     desc:"全生産×1.5",   cost:8000,  type:"all",   mul:1.5  },
+  { id:"u12", name:"遺伝子改良",       desc:"全生産×4",     cost:2e5,   type:"all",   mul:4    },
+  { id:"u13", name:"ナノマシン",       desc:"クリック×50",   cost:2e6,   type:"click", mul:50   },
+  { id:"u14", name:"次元農法",         desc:"全生産×8",     cost:5e7,   type:"all",   mul:8    },
+  { id:"u15", name:"時空間圧縮",       desc:"全生産×15",    cost:1e10,  type:"all",   mul:15   },
+  { id:"u16", name:"銀河農業ネット",   desc:"クリック×200",  cost:1e11,  type:"click", mul:200  },
+  { id:"u17", name:"フルーツ霊薬",     desc:"全生産×25",    cost:1e13,  type:"all",   mul:25   },
+  { id:"u18", name:"宇宙意識",         desc:"クリック×500",  cost:1e14,  type:"click", mul:500  },
+  { id:"u19", name:"無限農場",         desc:"全生産×50",    cost:1e15,  type:"all",   mul:50   },
+];
+
+const MILES = [
+  { id:"m0",  txt:"初めての収穫",       req:()=>G.total>=1 },
+  { id:"m1",  txt:"100個生産",          req:()=>G.total>=100 },
+  { id:"m2",  txt:"初めての施設",       req:()=>G.bldg.some(b=>b>0) },
+  { id:"m3",  txt:"💰 1,000達成",       req:()=>G.money>=1000 },
+  { id:"m4",  txt:"💰 100万達成",       req:()=>G.money>=1e6 },
+  { id:"m5",  txt:"💰 10億達成",        req:()=>G.money>=1e9 },
+  { id:"m6",  txt:"💰 1兆達成",         req:()=>G.money>=1e12 },
+  { id:"m7",  txt:"全施設を所持",       req:()=>G.bldg.every(b=>b>0) },
+  { id:"m8",  txt:"初転生",             req:()=>G.prestCount>=1 },
+  { id:"m9",  txt:"3回転生",            req:()=>G.prestCount>=3 },
+  { id:"m10", txt:"全アップグレード",   req:()=>UPGRADES.every(u=>G.upg[u.id]) },
+  { id:"m11", txt:"💰 1京達成",         req:()=>G.money>=1e16 },
+  { id:"m12", txt:"宇宙農場へ到達",     req:()=>G.prestCount>=8 },
+];
+
+const RANKS = [
+  [0,"見習い農家"],[1e3,"フルーツ職人"],[1e6,"収穫マスター"],
+  [1e9,"フルーツ実業家"],[1e12,"フルーツ財閥"],[1e15,"フルーツ王"],[1e18,"フルーツ神"]
+];
+
+const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], upg:{}, mileDone:{}, tick:0, perSec:0 };
+
+// ── セーブ（完全自動）──
+function saveGame(){
+  localStorage.setItem('fruitEmpireSave', JSON.stringify({
+    money:G.money, total:G.total, prest:G.prest, prestCount:G.prestCount,
+    bldg:G.bldg, upg:G.upg, mileDone:G.mileDone
+  }));
+}
+function loadGame(){
+  try {
+    const raw=localStorage.getItem('fruitEmpireSave');
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    G.money=d.money||0; G.total=d.total||0;
+    G.prest=d.prest||1; G.prestCount=d.prestCount||0;
+    G.bldg=d.bldg||[0,0,0,0,0,0,0,0,0];
+    G.upg=d.upg||{}; G.mileDone=d.mileDone||{};
+    G.perSec=calcPerSec();
+  } catch(e){}
+}
+setInterval(saveGame,100);
+
+// ── ユーティリティ ──
+function fmt(n){
+  if(n<1e3) return Math.floor(n).toLocaleString();
+  const suf=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Td"];
+  let i=0,v=n;
+  while(v>=1e3&&i<suf.length-1){v/=1e3;i++;}
+  return v.toFixed(2)+suf[i];
+}
+
+function fruitIdx(){ return Math.min(G.prestCount, FRUITS.length-1); }
+function fruit(){ return FRUITS[fruitIdx()]; }
+
+// ── 背景エンジン ──
+const cvs=document.getElementById('bg-canvas');
+const ctx=cvs.getContext('2d');
+let W=0,H=0,bgPts=[],currentFruitIdx=-1,bgTime=0;
+
+function resizeCvs(){ W=cvs.width=window.innerWidth; H=cvs.height=window.innerHeight; rebuildPts(); }
+window.addEventListener('resize',resizeCvs);
+
+function rebuildPts(){ bgPts=fruit().initPts(W,H); }
+
+function drawBg(){
+  bgTime++;
+  const fi=fruitIdx();
+  if(fi!==currentFruitIdx){
+    currentFruitIdx=fi;
+    rebuildPts();
+    document.body.style.background=fruit().bg;
+  }
+  fruit().drawBg(ctx,W,H,bgPts,bgTime);
+  requestAnimationFrame(drawBg);
+}
+
+function applyTheme(){
+  const f=fruit();
+  document.documentElement.style.setProperty('--f-acc',f.color);
+  document.documentElement.style.setProperty('--f-glow',f.glow);
+  document.getElementById('stage-icon').textContent=f.icon;
+  document.getElementById('stage-name').textContent=f.name;
+  document.getElementById('fruit-btn').textContent=f.icon;
+  document.getElementById('fruit-btn').style.background=f.btn;
+  document.getElementById('fruit-btn').style.boxShadow=`0 0 32px ${f.glow}, 0 4px 16px rgba(0,0,0,0.5)`;
+  document.getElementById('stage-sub').textContent=`プレステージ ${G.prestCount}回`;
+}
+
+function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest); }
+
+function calcPerSec(){
+  let ps=0;
+  for(let i=0;i<BLDGS.length;i++) ps+=BLDGS[i].ps*G.bldg[i];
+  let mul=1;
+  UPGRADES.filter(u=>u.type==="all"&&G.upg[u.id]).forEach(u=>mul*=u.mul);
+  return ps*mul*G.prest;
+}
+function calcClick(){
+  let cp=1;
+  UPGRADES.filter(u=>u.type==="click"&&G.upg[u.id]).forEach(u=>cp*=u.mul);
+  return cp*G.prest;
+}
+
+// ── クリックゾーン ──
+const clickZone=document.getElementById('click-zone');
+clickZone.addEventListener('pointerdown',(e)=>{
+  if(e.target.closest('button')) return;
+  clickZone.classList.add('pressing');
+  const cp=calcClick();
+  G.money+=cp; G.total+=cp;
+  spawnFloat('+'+fmt(cp),e);
+  tick_render();
+});
+clickZone.addEventListener('pointerup',()=>clickZone.classList.remove('pressing'));
+clickZone.addEventListener('pointerleave',()=>clickZone.classList.remove('pressing'));
+
+function spawnFloat(txt,e){
+  const appEl=document.getElementById('app');
+  const r2=appEl.getBoundingClientRect();
+  const span=document.createElement('div');
+  span.className='float-text';
+  span.textContent=txt;
+  span.style.cssText=`left:${e.clientX-r2.left+(Math.random()-0.5)*30}px;top:${e.clientY-r2.top-10}px;`;
+  appEl.appendChild(span);
+  requestAnimationFrame(()=>{
+    span.style.transform='translateY(-55px) scale(1.1)';
+    span.style.opacity='0';
+    setTimeout(()=>span.remove(),950);
+  });
+}
+
+// ── ショップ ──
+// 各施設のps貢献割合を計算（バー表示用）
+function bldgPsShare(i){ const tot=BLDGS.reduce((s,b,j)=>s+b.ps*G.bldg[j],0)||1; return BLDGS[i].ps*G.bldg[i]/tot; }
+
+// アップグレード絵文字マップ
+const UPG_ICONS = {
+  click:['🖐️','🌾','🤖','⚙️','🦾','🧠','⚡','🚀','⏰','🌌','🪄','🔮','🌀','💫'],
+  all:  ['🧪','☀️','🧬','🏗️','🌊','🕸️','🌺','💊','♾️','🛸']
+};
+let upgIconCache={};
+function getUpgIcon(u){
+  if(!upgIconCache[u.id]){
+    const arr=UPG_ICONS[u.type]||UPG_ICONS.all;
+    const idx=parseInt(u.id.replace('u',''))%arr.length;
+    upgIconCache[u.id]=arr[idx];
+  }
+  return upgIconCache[u.id];
+}
+
+function renderShop(){
+  const el=document.getElementById('shop-items');
+  el.innerHTML='';
+  const totalPs=BLDGS.reduce((s,b,j)=>s+b.ps*G.bldg[j],0)||1;
+  BLDGS.forEach((b,i)=>{
+    const cost=bldgCost(i), can=G.money>=cost, owned=G.bldg[i];
+    const share=Math.min(BLDGS[i].ps*owned/totalPs,1);
+    const div=document.createElement('div');
+    const cls=can?'shop-item can-buy':(owned>0?'shop-item cant':'shop-item cant zero-owned');
+    div.className=cls;
+    const ico=b.name.split(' ')[0];
+    const nm=b.name.slice(b.name.indexOf(' ')+1);
+    div.innerHTML=`
+      <div class="shop-count-badge">${owned}</div>
+      <div class="shop-inner">
+        <div class="shop-ico-wrap">${ico}</div>
+        <div class="shop-name">${nm}</div>
+        <div class="shop-desc">${b.desc}</div>
+        <div class="shop-cost">💰 ${fmt(cost)}</div>
+        <div class="shop-ps-bar"><div class="shop-ps-fill" style="width:${(share*100).toFixed(1)}%"></div></div>
+      </div>`;
+    if(can) div.addEventListener('pointerdown',(e)=>{e.stopPropagation();buyBldg(i);});
+    el.appendChild(div);
+  });
+}
+
+// ── アップグレード ──
+function renderUpgrades(){
+  const el=document.getElementById('upg-grid');
+  const avail=UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
+  if(!avail.length){ el.innerHTML='<p style="font-size:12px;color:#666;grid-column:1/-1;text-align:center;padding:14px">✨ 全取得済み！</p>'; return; }
+  el.innerHTML='';
+  avail.forEach(u=>{
+    const can=G.money>=u.cost;
+    const ico=getUpgIcon(u);
+    const typeLabel=u.type==='click'?'TAP':'ALL';
+    const typeClass=u.type==='click'?'upg-type-click':'upg-type-all';
+    const btn=document.createElement('button');
+    btn.className='upg-btn'+(can?' can-buy':'');
+    btn.disabled=!can;
+    btn.innerHTML=`
+      <span class="upg-type-badge ${typeClass}">${typeLabel}</span>
+      <div class="upg-inner">
+        <div class="upg-icon-wrap">${ico}</div>
+        <div class="upg-name">${u.name}</div>
+        <div class="upg-desc">${u.desc}</div>
+        <div class="upg-cost">💰 ${fmt(u.cost)}</div>
+      </div>`;
+    if(can) btn.addEventListener('pointerdown',(e)=>{e.stopPropagation();buyUpg(u.id);});
+    el.appendChild(btn);
+  });
+}
+
+// ── HUD ──
+function renderHUD(){
+  document.getElementById('money-big').textContent='💰 '+fmt(G.money);
+  document.getElementById('stat-total').textContent=fmt(G.total);
+  document.getElementById('stat-ps').textContent=fmt(G.perSec);
+  document.getElementById('stat-prest').textContent=G.prestCount;
+  document.getElementById('click-power').textContent='+'+fmt(calcClick())+'💰 / タップ';
+
+  // プレステージカード: 全施設を1個以上持ったら表示
+  const allOwned=G.bldg.every(b=>b>0);
+  document.getElementById('prest-card').classList.toggle('visible', allOwned);
+
+  if(allOwned){
+    const thr=1e12*Math.pow(10,G.prestCount);
+    const pct=Math.min(G.money/thr*100,100);
+    document.getElementById('prest-bar').style.width=pct+'%';
+    const can=G.money>=thr;
+    document.getElementById('prest-info').textContent=
+      can?`転生可能！ボーナス: ×${G.prest+1}`:`必要: 💰 ${fmt(thr)}（現在: ${fmt(G.money)}）`;
+    document.getElementById('prest-btn').disabled=!can;
+  }
+
+  let rank=RANKS[0][1];
+  for(const [req,name] of RANKS){ if(G.total>=req) rank=name; }
+  document.getElementById('rank-badge').textContent='ランク: '+rank;
+}
+
+function renderMilestones(){
+  const el=document.getElementById('ms-bar');
+  if(!el) return;
+  el.innerHTML='';
+  // 完了済みを先に、未完了を後に
+  const sorted=[...MILES].sort((a,b)=>{
+    const da=G.mileDone[a.id]?1:0, db=G.mileDone[b.id]?1:0;
+    return db-da;
+  });
+  sorted.forEach(m=>{
+    const done=G.mileDone[m.id];
+    const chip=document.createElement('div');
+    chip.className='ms-chip'+(done?' done':'');
+    chip.innerHTML=`<span class="chip-icon">${done?'✅':'⬜'}</span>${m.txt}`;
+    el.appendChild(chip);
+  });
+}
+
+function showNotif(txt){
+  const container=document.getElementById('notif-container');
+  const toast=document.createElement('div');
+  toast.className='notif-toast';
+  toast.innerHTML=`<div class="notif-icon">🏆</div><div class="notif-text"><div class="notif-title">実績解除！</div>${txt}</div>`;
+  container.appendChild(toast);
+  setTimeout(()=>{
+    toast.classList.add('fadeOut');
+    setTimeout(()=>toast.remove(),400);
+  },3500);
+}
+
+function checkMilestones(){
+  let changed=false;
+  MILES.forEach(m=>{ if(!G.mileDone[m.id]&&m.req()){ G.mileDone[m.id]=true; changed=true; showNotif(m.txt); } });
+  if(changed) renderMilestones();
+}
+
+function buyBldg(i){
+  const cost=bldgCost(i);
+  if(G.money<cost) return;
+  G.money-=cost; G.bldg[i]++;
+  G.perSec=calcPerSec();
+  tick_render();
+}
+function buyUpg(id){
+  const u=UPGRADES.find(x=>x.id===id);
+  if(!u||G.money<u.cost) return;
+  G.money-=u.cost; G.upg[id]=true;
+  G.perSec=calcPerSec();
+  tick_render();
+}
+
+// ── 転生パーティクル ──
+let prestParts=[], prestAnimId=null;
+function startPrestParticles(){
+  const cvs=document.getElementById('prest-canvas');
+  const ctx=cvs.getContext('2d');
+  cvs.width=window.innerWidth; cvs.height=window.innerHeight;
+  const W=cvs.width, H=cvs.height;
+  const cx=W/2, cy=H/2;
+  prestParts=[];
+  const f=fruit();
+  for(let i=0;i<180;i++){
+    const ang=Math.random()*Math.PI*2;
+    const spd=3+Math.random()*8;
+    prestParts.push({
+      x:cx,y:cy, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd,
+      r:2+Math.random()*4, life:1, decay:0.012+Math.random()*0.018,
+      col:Math.random()<0.5?f.color:'#ffd93d', spin:Math.random()*0.3-0.15,
+      trail:[], type:Math.random()<0.3?'star':'circle'
+    });
+  }
+  // 文字パーティクル
+  const chars=['✨','🌟','💫','⭐','🎉','🎊'];
+  for(let i=0;i<20;i++){
+    const ang=Math.random()*Math.PI*2;
+    const spd=2+Math.random()*5;
+    prestParts.push({
+      x:cx+Math.cos(ang)*20, y:cy+Math.sin(ang)*20,
+      vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd-2,
+      r:14, life:1, decay:0.008, col:'white',
+      type:'emoji', char:chars[Math.floor(Math.random()*chars.length)], spin:0, trail:[]
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    prestParts=prestParts.filter(p=>p.life>0);
+    prestParts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.12; p.vx*=0.98; p.life-=p.decay;
+      ctx.globalAlpha=Math.max(0,p.life);
+      if(p.type==='emoji'){
+        ctx.font=`${p.r*1.8}px serif`;
+        ctx.fillText(p.char,p.x,p.y);
+      } else {
+        ctx.fillStyle=p.col;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2); ctx.fill();
+        // 尾を引く
+        if(p.trail.length>3){
+          ctx.strokeStyle=p.col; ctx.lineWidth=p.r*0.5*p.life;
+          ctx.beginPath(); ctx.moveTo(p.trail[0].x,p.trail[0].y);
+          p.trail.forEach(t=>ctx.lineTo(t.x,t.y)); ctx.stroke();
+        }
+      }
+      p.trail.push({x:p.x,y:p.y});
+      if(p.trail.length>6) p.trail.shift();
+    });
+    ctx.globalAlpha=1;
+    if(prestParts.length>0) prestAnimId=requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,W,H);
+  }
+  if(prestAnimId) cancelAnimationFrame(prestAnimId);
+  draw();
+}
+
+function doPrestige(){
+  const thr=1e12*Math.pow(10,G.prestCount);
+  if(G.money<thr) return;
+  G.prestCount++; G.prest=G.prestCount+1;
+  G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.upg={}; G.perSec=0;
+  applyTheme();
+  const f=fruit();
+  document.getElementById('prest-big-icon').textContent=f.icon;
+  document.getElementById('prest-title').textContent=`✨ 転生！${f.name} へ`;
+  document.getElementById('prest-sub').textContent=`施設コスト減・全生産量アップ！`;
+  document.getElementById('prest-bonus-num').textContent=`× ${G.prest} ボーナス`;
+  // アニメリセットのためクラス除去→再付与
+  const ov=document.getElementById('prest-overlay');
+  ov.classList.remove('show');
+  void ov.offsetWidth;
+  ov.classList.add('show');
+  startPrestParticles();
+  tick_render();
+}
+function closePrest(){
+  document.getElementById('prest-overlay').classList.remove('show');
+  if(prestAnimId) cancelAnimationFrame(prestAnimId);
+  const cvs=document.getElementById('prest-canvas');
+  if(cvs){ const ctx=cvs.getContext('2d'); ctx.clearRect(0,0,cvs.width,cvs.height); }
+}
+
+function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); checkMilestones(); applyTheme(); }
+
+// ── 起動 ──
+resizeCvs();
+drawBg();
+loadGame();
+applyTheme();
+renderMilestones();
+tick_render();
+
+// ── メインループ ──
+setInterval(()=>{
+  G.perSec=calcPerSec();
+  const earn=G.perSec/20;
+  G.money+=earn; G.total+=earn;
+  G.tick++;
+  renderHUD();
+  if(G.tick%4===0){ renderShop(); renderUpgrades(); }
+  if(G.tick%8===0){ checkMilestones(); }
+},50);
+</script>
+</body>
+</html>

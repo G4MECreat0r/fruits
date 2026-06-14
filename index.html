@@ -1391,12 +1391,12 @@ function renderForbiddenMarket(){
 
 // ══ 神話の果実マーケット（Prest15+専用） ══
 const MYTH = [
-  { id:'m0', tier:1, icon:'🌤️', name:'黎明の実',       desc:'全生産 ×500',         cost:1e20, type:'all',   mul:500,      unlockAfter:null },
-  { id:'m1', tier:1, icon:'⚡',  name:'雷神の果実',     desc:'タップ ×2,000',        cost:5e20, type:'click', mul:2000,     unlockAfter:'m0' },
-  { id:'m2', tier:2, icon:'🌊',  name:'大洪水の種',     desc:'全生産 ×10,000',       cost:1e24, type:'all',   mul:10000,    unlockAfter:'m1' },
-  { id:'m3', tier:2, icon:'🔱',  name:'神の三叉戟',     desc:'タップ ×50,000',       cost:1e27, type:'click', mul:50000,    unlockAfter:'m2' },
-  { id:'m4', tier:3, icon:'🌌',  name:'宇宙樹の実',     desc:'全生産 ×500,000',      cost:1e32, type:'all',   mul:500000,   unlockAfter:'m3' },
-  { id:'m5', tier:3, icon:'👑',  name:'神話の王冠',     desc:'全生産＆タップ ×5,000,000', cost:1e40, type:'both', mul:5000000, unlockAfter:'m4' },
+  { id:'m0', tier:1, icon:'🌤️', name:'黎明の実',       desc:'全生産 ×50',          cost:1e20, type:'all',   mul:50,      unlockAfter:null },
+  { id:'m1', tier:1, icon:'⚡',  name:'雷神の果実',     desc:'タップ ×200',          cost:5e20, type:'click', mul:200,     unlockAfter:'m0' },
+  { id:'m2', tier:2, icon:'🌊',  name:'大洪水の種',     desc:'全生産 ×500',          cost:1e24, type:'all',   mul:500,     unlockAfter:'m1' },
+  { id:'m3', tier:2, icon:'🔱',  name:'神の三叉戟',     desc:'タップ ×2,000',        cost:1e27, type:'click', mul:2000,    unlockAfter:'m2' },
+  { id:'m4', tier:3, icon:'🌌',  name:'宇宙樹の実',     desc:'全生産 ×10,000',       cost:1e32, type:'all',   mul:10000,   unlockAfter:'m3' },
+  { id:'m5', tier:3, icon:'👑',  name:'神話の王冠',     desc:'全生産＆タップ ×50,000', cost:1e40, type:'both', mul:50000,  unlockAfter:'m4' },
 ];
 function isMythUnlocked(m){ if(G.prestCount<15) return false; if(!m.unlockAfter) return true; return !!G.upg['_m_'+m.unlockAfter]; }
 function mythAllMul(){ let v=1; MYTH.forEach(m=>{ if(G.upg['_m_'+m.id]&&(m.type==='all'||m.type==='both')) v*=m.mul; }); return v; }

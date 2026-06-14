@@ -512,124 +512,7 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 .auto-toggle input:checked + .auto-slider { background: rgba(50,90,180,0.6); border-color: #6699ff; }
 .auto-toggle input:checked + .auto-slider::before { transform: translateX(20px); background: #88aaff; }
 
-/* ══ 禁断の果実マーケット ══ */
-#menu-btn-forbidden {
-  display: none;
-  background: linear-gradient(135deg, rgba(20,0,30,0.95), rgba(40,0,20,0.95));
-  border-color: #aa00ff;
-  animation: forbiddenPulse 2s ease-in-out infinite;
-}
-#menu-btn-forbidden.visible {
-  display: flex;
-}
-@keyframes forbiddenPulse {
-  0%,100%{ box-shadow: 0 0 10px rgba(170,0,255,0.5), inset 0 0 8px rgba(170,0,255,0.1); border-color:#aa00ff; }
-  50%    { box-shadow: 0 0 24px rgba(200,50,255,0.8), inset 0 0 16px rgba(200,50,255,0.2); border-color:#dd44ff; }
-}
-#menu-btn-forbidden .menu-icon { filter: drop-shadow(0 0 6px #cc00ff); }
-
-/* 禁断マーケットモーダル */
-#modal-forbidden .modal-content {
-  background: linear-gradient(160deg, #0d0018, #1a0030, #0a000f);
-  border: 1px solid #660099;
-}
-#modal-forbidden .modal-title { color: #dd66ff; text-shadow: 0 0 12px #aa00ff; }
-
-.forbidden-intro {
-  background: rgba(100,0,150,0.15);
-  border: 1px solid rgba(170,0,255,0.3);
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 11px;
-  color: #cc88ff;
-  margin-bottom: 12px;
-  line-height: 1.6;
-}
-.forbidden-intro strong { color: #ff44ff; }
-
-.forbidden-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-}
-@media(max-width:400px){ .forbidden-grid{ grid-template-columns:1fr; } }
-
-.forbidden-item {
-  position: relative; overflow: hidden;
-  border-radius: 14px;
-  border: 1.5px solid #550088;
-  background: linear-gradient(160deg, #0d0022, #1a0040);
-  padding: 12px 10px;
-  cursor: pointer;
-  transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-}
-.forbidden-item::before {
-  content:''; position:absolute; inset:0; border-radius:14px;
-  background: linear-gradient(135deg,rgba(200,0,255,0.07) 0%,transparent 60%);
-  pointer-events:none;
-}
-.forbidden-item:hover:not(.fi-locked):not(.fi-owned) {
-  transform: translateY(-2px) scale(1.03);
-  border-color: #cc44ff;
-  box-shadow: 0 6px 24px rgba(180,0,255,0.45);
-}
-.forbidden-item.fi-can-buy {
-  border-color: #cc00ff;
-  animation: forbiddenCardPulse 1.8s ease-in-out infinite;
-}
-@keyframes forbiddenCardPulse {
-  0%,100%{ box-shadow: 0 0 10px rgba(180,0,255,0.4); }
-  50%    { box-shadow: 0 0 24px rgba(220,50,255,0.75); }
-}
-.forbidden-item.fi-locked {
-  opacity: 0.3; cursor: default; filter: grayscale(0.6);
-}
-.forbidden-item.fi-owned {
-  opacity: 0.6; cursor: default;
-  border-color: #442266;
-  background: linear-gradient(160deg,#08000f,#110022);
-}
-
-.fi-glow-icon { font-size: 32px; margin-bottom: 6px; filter: drop-shadow(0 0 8px #cc00ff); }
-.fi-owned .fi-glow-icon { filter: none; }
-.fi-name { font-size: 12px; font-weight: 800; color: #dd88ff; margin-bottom: 4px; }
-.fi-owned .fi-name { color: #886699; }
-.fi-effect { font-size: 13px; font-weight: 900; color: #ff44ff; margin-bottom: 6px; text-shadow: 0 0 8px #ff00ff; }
-.fi-owned .fi-effect { color: #553366; text-shadow: none; }
-.fi-cost { font-size: 11px; color: #9966cc; background: rgba(0,0,0,0.4); border-radius: 99px; padding: 3px 10px; }
-.fi-lock-msg { font-size: 10px; color: #553366; }
-.fi-owned-badge {
-  position: absolute; top: 6px; right: 6px;
-  font-size: 9px; font-weight: 700; color: #aa44cc;
-  background: rgba(40,0,60,0.8); border: 1px solid #440066;
-  border-radius: 99px; padding: 2px 6px;
-}
-.fi-tier-badge {
-  position: absolute; top: 6px; left: 6px;
-  font-size: 9px; font-weight: 700; color: #ff88ff;
-  background: rgba(80,0,120,0.8); border: 1px solid #880099;
-  border-radius: 99px; padding: 2px 6px;
-}
-
-/* 禁断マーケット解放演出 */
-.forbidden-unlock-toast {
-  background: linear-gradient(135deg, #1a003a, #0d0022);
-  border: 1px solid #aa00ff;
-  color: #dd66ff;
-}
-.forbidden-unlock-toast .notif-icon { filter: drop-shadow(0 0 8px #cc00ff); }
-
-/* 禁断バフ表示 */
-#forbidden-summary {
-  background: rgba(80,0,120,0.2);
-  border: 1px solid rgba(150,0,200,0.3);
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-}
-.fs-item { text-align:center; }
-.fs-val { font-size: 16px; font-weight: 800; color: #ff44ff; text-shadow: 0 0 8px #cc00ff; }
-.fs-label { font-size: 9px; color: #9966cc; margin-top: 1px; }
+/* ══ メニューボタン ══ */
 #menu-bar {
   display: grid; grid-template-columns: repeat(5,1fr); gap: 8px;
   margin-bottom: 10px;
@@ -681,7 +564,79 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
   display: flex; align-items: center; justify-content: center; flex-shrink:0;
 }
 .modal-close:hover { background: rgba(255,255,255,0.16); }
-#ms-grid-full { max-height: none; }
+/* ══ 禁断の果実マーケット ══ */
+#menu-btn-forbidden {
+  background: linear-gradient(135deg, rgba(20,0,30,0.95), rgba(40,0,20,0.95));
+  border-color: #aa00ff;
+  opacity: 0; pointer-events: none; transition: opacity 0.4s, transform 0.12s, border-color 0.2s;
+  animation: forbiddenPulse 2s ease-in-out infinite;
+}
+#menu-btn-forbidden.visible { opacity: 1; pointer-events: auto; }
+@keyframes forbiddenPulse {
+  0%,100%{ box-shadow: 0 0 10px rgba(170,0,255,0.5); border-color:#aa00ff; }
+  50%    { box-shadow: 0 0 24px rgba(200,50,255,0.8); border-color:#dd44ff; }
+}
+#menu-btn-forbidden .menu-icon { filter: drop-shadow(0 0 6px #cc00ff); }
+#modal-forbidden .modal-content {
+  background: linear-gradient(160deg, #0d0018, #1a0030, #0a000f);
+  border: 1px solid #660099;
+}
+#modal-forbidden .modal-title { color: #dd66ff; text-shadow: 0 0 12px #aa00ff; }
+.forbidden-intro {
+  background: rgba(100,0,150,0.15); border: 1px solid rgba(170,0,255,0.3);
+  border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #cc88ff;
+  margin-bottom: 12px; line-height: 1.6;
+}
+.forbidden-intro strong { color: #ff44ff; }
+.forbidden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:400px){ .forbidden-grid{ grid-template-columns:1fr; } }
+.forbidden-item {
+  position: relative; overflow: hidden; border-radius: 14px;
+  border: 1.5px solid #550088;
+  background: linear-gradient(160deg, #0d0022, #1a0040);
+  padding: 12px 10px; cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.forbidden-item:hover:not(.fi-locked):not(.fi-owned) {
+  transform: translateY(-2px) scale(1.03); border-color: #cc44ff;
+  box-shadow: 0 6px 24px rgba(180,0,255,0.45);
+}
+.forbidden-item.fi-can-buy {
+  border-color: #cc00ff; animation: forbiddenCardPulse 1.8s ease-in-out infinite;
+}
+@keyframes forbiddenCardPulse {
+  0%,100%{ box-shadow: 0 0 10px rgba(180,0,255,0.4); }
+  50%    { box-shadow: 0 0 24px rgba(220,50,255,0.75); }
+}
+.forbidden-item.fi-locked { opacity: 0.3; cursor: default; filter: grayscale(0.6); }
+.forbidden-item.fi-owned  { opacity: 0.6; cursor: default; border-color: #442266; background: linear-gradient(160deg,#08000f,#110022); }
+.fi-glow-icon { font-size: 32px; margin-bottom: 6px; filter: drop-shadow(0 0 8px #cc00ff); }
+.fi-owned .fi-glow-icon { filter: none; }
+.fi-name   { font-size: 12px; font-weight: 800; color: #dd88ff; margin-bottom: 4px; }
+.fi-owned .fi-name { color: #886699; }
+.fi-effect { font-size: 13px; font-weight: 900; color: #ff44ff; margin-bottom: 6px; text-shadow: 0 0 8px #ff00ff; }
+.fi-owned .fi-effect { color: #553366; text-shadow: none; }
+.fi-cost   { font-size: 11px; color: #9966cc; background: rgba(0,0,0,0.4); border-radius: 99px; padding: 3px 10px; }
+.fi-lock-msg { font-size: 10px; color: #553366; }
+.fi-owned-badge {
+  position: absolute; top: 6px; right: 6px; font-size: 9px; font-weight: 700; color: #aa44cc;
+  background: rgba(40,0,60,0.8); border: 1px solid #440066; border-radius: 99px; padding: 2px 6px;
+}
+.fi-tier-badge {
+  position: absolute; top: 6px; left: 6px; font-size: 9px; font-weight: 700; color: #ff88ff;
+  background: rgba(80,0,120,0.8); border: 1px solid #880099; border-radius: 99px; padding: 2px 6px;
+}
+.forbidden-unlock-toast { background: linear-gradient(135deg,#1a003a,#0d0022); border: 1px solid #aa00ff; color: #dd66ff; }
+.forbidden-unlock-toast .notif-icon { filter: drop-shadow(0 0 8px #cc00ff); }
+#forbidden-summary {
+  background: rgba(80,0,120,0.2); border: 1px solid rgba(150,0,200,0.3);
+  border-radius: 10px; padding: 8px 12px; margin-bottom: 10px;
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.fs-item { text-align:center; }
+.fs-val   { font-size: 16px; font-weight: 800; color: #ff44ff; text-shadow: 0 0 8px #cc00ff; }
+.fs-label { font-size: 9px; color: #9966cc; margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -849,7 +804,7 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
   </div>
 </div>
 
-<!-- 禁断の果実マーケットモーダル -->
+<!-- 禁断の果実マーケット -->
 <div class="modal-overlay" id="modal-forbidden" onclick="if(event.target===this) closeModal('forbidden')">
   <div class="modal-content">
     <div class="modal-header">
@@ -858,8 +813,7 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
     </div>
     <div class="forbidden-intro">
       ⚠️ <strong>10回転生した者だけが入れる禁断の店</strong>。<br>
-      ここに並ぶのは、通常では手が届かない<strong>超越的な力</strong>。<br>
-      一度手にすれば生産量は数百倍…いや、数万倍にも膨れ上がる。
+      ここに並ぶのは通常では手が届かない超越的な力。購入するほど次が解放される。
     </div>
     <div id="forbidden-summary"></div>
     <div class="forbidden-grid" id="forbidden-grid"></div>
@@ -1151,15 +1105,12 @@ const MILES = [
   { id:"m10", txt:"全アップグレード",   req:()=>UPGRADES.every(u=>G.upg[u.id]) },
   { id:"m11", txt:"💰 1京達成",         req:()=>G.money>=1e16 },
   { id:"m12", txt:"宇宙農場へ到達",     req:()=>G.prestCount>=8 },
-  { id:"m13", txt:"🍒 禁断の扉を開く",  req:()=>G.prestCount>=10 },
-  { id:"m14", txt:"🌑 深淵の種を取得",  req:()=>!!G.upg['_f_f0'] },
-  { id:"m15", txt:"⚰️ 禁断の全て取得",  req:()=>FORBIDDEN.every(f=>!!G.upg['_f_'+f.id]) },
 ];
 
 const RANKS = [
   [0,"見習い農家"],[1e3,"フルーツ職人"],[1e6,"収穫マスター"],
   [1e9,"フルーツ実業家"],[1e12,"フルーツ財閥"],[1e15,"フルーツ王"],[1e18,"フルーツ神"],
-  [1e24,"禁断の農場主"],[1e30,"深淵の収穫者"],[1e40,"🍒 禁断の果実神"]
+  [1e24,"禁断の農場主"],[1e30,"🍒 禁断の果実神"]
 ];
 
 const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], upg:{}, mileDone:{}, rewardClaimed:{}, tick:0, perSec:0 };
@@ -1280,169 +1231,82 @@ function prestClickMul(){
   return mul;
 }
 
+function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest*bldgCostMul()); }
+
 // ══ 禁断の果実マーケット（Prest10+専用） ══
 const FORBIDDEN = [
-  {
-    id:'f0', tier:1, icon:'🌑', name:'深淵の種',
-    desc:'全生産 ×5',
-    cost:1e15, type:'all', mul:5,
-    unlockPrest:10, unlockAfter:null
-  },
-  {
-    id:'f1', tier:1, icon:'🩸', name:'血の収穫',
-    desc:'タップ ×10',
-    cost:5e15, type:'click', mul:10,
-    unlockPrest:10, unlockAfter:'f0'
-  },
-  {
-    id:'f2', tier:2, icon:'💀', name:'死神の鎌',
-    desc:'全生産 ×20',
-    cost:1e18, type:'all', mul:20,
-    unlockPrest:10, unlockAfter:'f1'
-  },
-  {
-    id:'f3', tier:2, icon:'🌀', name:'次元崩壊の実',
-    desc:'タップ ×50',
-    cost:1e20, type:'click', mul:50,
-    unlockPrest:10, unlockAfter:'f2'
-  },
-  {
-    id:'f4', tier:3, icon:'👁️', name:'全知の眼',
-    desc:'全生産 ×100',
-    cost:1e24, type:'all', mul:100,
-    unlockPrest:10, unlockAfter:'f3'
-  },
-  {
-    id:'f5', tier:3, icon:'⚰️', name:'禁断のエリクサー',
-    desc:'全生産＆タップ ×200',
-    cost:1e30, type:'both', mul:200,
-    unlockPrest:10, unlockAfter:'f4'
-  },
+  { id:'f0', tier:1, icon:'🌑', name:'深淵の種',       desc:'全生産 ×5',        cost:1e15, type:'all',   mul:5,   unlockAfter:null },
+  { id:'f1', tier:1, icon:'🩸', name:'血の収穫',       desc:'タップ ×10',       cost:5e15, type:'click', mul:10,  unlockAfter:'f0' },
+  { id:'f2', tier:2, icon:'💀', name:'死神の鎌',       desc:'全生産 ×20',       cost:1e18, type:'all',   mul:20,  unlockAfter:'f1' },
+  { id:'f3', tier:2, icon:'🌀', name:'次元崩壊の実',   desc:'タップ ×50',       cost:1e20, type:'click', mul:50,  unlockAfter:'f2' },
+  { id:'f4', tier:3, icon:'👁️', name:'全知の眼',      desc:'全生産 ×100',      cost:1e24, type:'all',   mul:100, unlockAfter:'f3' },
+  { id:'f5', tier:3, icon:'⚰️', name:'禁断のエリクサー',desc:'全生産＆タップ ×200',cost:1e30,type:'both', mul:200, unlockAfter:'f4' },
 ];
-
-function isForbiddenUnlocked(f){
-  if(G.prestCount < f.unlockPrest) return false;
-  if(!f.unlockAfter) return true;
-  return !!G.upg['_f_'+f.unlockAfter];
-}
-
-function forbiddenAllMul(){
-  let mul=1;
-  FORBIDDEN.forEach(f=>{
-    if(G.upg['_f_'+f.id] && (f.type==='all'||f.type==='both')) mul*=f.mul;
-  });
-  return mul;
-}
-function forbiddenClickMul(){
-  let mul=1;
-  FORBIDDEN.forEach(f=>{
-    if(G.upg['_f_'+f.id] && (f.type==='click'||f.type==='both')) mul*=f.mul;
-  });
-  return mul;
-}
+function isFbUnlocked(f){ if(G.prestCount<10) return false; if(!f.unlockAfter) return true; return !!G.upg['_f_'+f.unlockAfter]; }
+function fbAllMul(){ let m=1; FORBIDDEN.forEach(f=>{ if(G.upg['_f_'+f.id]&&(f.type==='all'||f.type==='both')) m*=f.mul; }); return m; }
+function fbClickMul(){ let m=1; FORBIDDEN.forEach(f=>{ if(G.upg['_f_'+f.id]&&(f.type==='click'||f.type==='both')) m*=f.mul; }); return m; }
 
 function buyForbidden(id){
   const f=FORBIDDEN.find(x=>x.id===id);
-  if(!f||G.money<f.cost) return;
-  if(!isForbiddenUnlocked(f)) return;
-  if(G.upg['_f_'+id]) return;
-  G.money -= f.cost;
-  G.upg['_f_'+id] = true;
-  G.perSec = calcPerSec();
-  // 次の禁断アイテムが解放されたら通知
+  if(!f||G.money<f.cost||!isFbUnlocked(f)||G.upg['_f_'+id]) return;
+  G.money-=f.cost; G.upg['_f_'+id]=true; G.perSec=calcPerSec();
   const next=FORBIDDEN.find(x=>x.unlockAfter===id);
   if(next){
-    showForbiddenNotif(`🍒 <strong>${next.name}</strong> が解放された…！`);
+    const c=document.getElementById('notif-container');
+    const t=document.createElement('div');
+    t.className='notif-toast'; t.style.cssText='background:linear-gradient(135deg,#1a003a,#0d0022);border:1px solid #aa00ff;color:#dd66ff';
+    t.innerHTML=`<div class="notif-icon" style="filter:drop-shadow(0 0 8px #cc00ff)">🍒</div><div class="notif-text"><div class="notif-title">禁断の力が目覚めた</div>${next.name} が解放！</div>`;
+    c.appendChild(t); setTimeout(()=>{t.classList.add('fadeOut');setTimeout(()=>t.remove(),400);},4000);
   }
-  tick_render();
-  renderForbiddenMarket();
-}
-
-function showForbiddenNotif(html){
-  const container=document.getElementById('notif-container');
-  const toast=document.createElement('div');
-  toast.className='notif-toast forbidden-unlock-toast';
-  toast.innerHTML=`<div class="notif-icon">🍒</div><div class="notif-text"><div class="notif-title">禁断の力が目覚めた</div>${html}</div>`;
-  container.appendChild(toast);
-  setTimeout(()=>{
-    toast.classList.add('fadeOut');
-    setTimeout(()=>toast.remove(),400);
-  },4000);
+  tick_render(); renderForbiddenMarket();
 }
 
 function renderForbiddenMarket(){
-  // メニューボタン表示切り替え
   const btn=document.getElementById('menu-btn-forbidden');
-  if(G.prestCount>=10){ btn.classList.add('visible'); }
+  if(G.prestCount>=10) btn.classList.add('visible');
   else { btn.classList.remove('visible'); return; }
-
-  // バッジ（購入可能な禁断アイテム数）
   const badge=document.getElementById('badge-forbidden');
-  const canCount=FORBIDDEN.filter(f=>isForbiddenUnlocked(f)&&!G.upg['_f_'+f.id]&&G.money>=f.cost).length;
-  if(canCount>0){ badge.style.display='flex'; badge.textContent=canCount; }
-  else { badge.style.display='none'; }
-
+  const can=FORBIDDEN.filter(f=>isFbUnlocked(f)&&!G.upg['_f_'+f.id]&&G.money>=f.cost).length;
+  if(can>0){badge.style.display='flex';badge.textContent=can;}else{badge.style.display='none';}
   const grid=document.getElementById('forbidden-grid');
   if(!grid) return;
   grid.innerHTML='';
-
-  // サマリー
   const sumEl=document.getElementById('forbidden-summary');
   if(sumEl){
-    const ownedCount=FORBIDDEN.filter(f=>G.upg['_f_'+f.id]).length;
-    if(ownedCount>0){
-      const am=forbiddenAllMul();
-      const cm=forbiddenClickMul();
-      sumEl.innerHTML=`
-        <div class="fs-item"><div class="fs-val">×${fmt(am)}</div><div class="fs-label">禁断生産倍率</div></div>
-        <div class="fs-item"><div class="fs-val">×${fmt(cm)}</div><div class="fs-label">禁断タップ倍率</div></div>
-        <div class="fs-item"><div class="fs-val">${ownedCount}/${FORBIDDEN.length}</div><div class="fs-label">取得数</div></div>`;
+    const owned=FORBIDDEN.filter(f=>G.upg['_f_'+f.id]).length;
+    if(owned>0){
       sumEl.style.display='flex';
-    } else {
-      sumEl.style.display='none';
-    }
+      sumEl.innerHTML=`<div class="fs-item"><div class="fs-val">×${fmt(fbAllMul())}</div><div class="fs-label">禁断生産倍率</div></div>
+        <div class="fs-item"><div class="fs-val">×${fmt(fbClickMul())}</div><div class="fs-label">禁断タップ倍率</div></div>
+        <div class="fs-item"><div class="fs-val">${owned}/${FORBIDDEN.length}</div><div class="fs-label">取得数</div></div>`;
+    } else { sumEl.style.display='none'; }
   }
-
   FORBIDDEN.forEach(f=>{
-    const owned=!!G.upg['_f_'+f.id];
-    const unlocked=isForbiddenUnlocked(f);
-    const canBuy=unlocked&&!owned&&G.money>=f.cost;
+    const owned=!!G.upg['_f_'+f.id], unlocked=isFbUnlocked(f), canBuy=unlocked&&!owned&&G.money>=f.cost;
     const div=document.createElement('div');
-    let cls='forbidden-item';
-    if(owned) cls+=' fi-owned';
-    else if(!unlocked) cls+=' fi-locked';
-    else if(canBuy) cls+=' fi-can-buy';
-    div.className=cls;
-    div.innerHTML=`
-      <div class="fi-tier-badge">Tier ${f.tier}</div>
+    div.className='forbidden-item'+(owned?' fi-owned':!unlocked?' fi-locked':canBuy?' fi-can-buy':'');
+    div.innerHTML=`<div class="fi-tier-badge">Tier ${f.tier}</div>
       ${owned?'<div class="fi-owned-badge">取得済み</div>':''}
       <div class="fi-glow-icon">${f.icon}</div>
       <div class="fi-name">${f.name}</div>
       <div class="fi-effect">${f.desc}</div>
-      ${unlocked&&!owned
-        ? `<div class="fi-cost">💰 ${fmt(f.cost)}</div>`
-        : owned ? '<div class="fi-cost" style="color:#553366">解放済み</div>'
-        : `<div class="fi-lock-msg">🔒 前の禁断を取得で解放</div>`}`;
-    if(canBuy){
-      div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyForbidden(f.id);});
-    }
+      ${unlocked&&!owned?`<div class="fi-cost">💰 ${fmt(f.cost)}</div>`:owned?'<div class="fi-cost" style="color:#553366">解放済み</div>':'<div class="fi-lock-msg">🔒 前の禁断を取得で解放</div>'}`;
+    if(canBuy) div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyForbidden(f.id);});
     grid.appendChild(div);
   });
 }
-
-// ── calcPerSec / calcClick に禁断倍率を乗算 ──
 
 function calcPerSec(){
   let ps=0;
   for(let i=0;i<BLDGS.length;i++) ps+=BLDGS[i].ps*G.bldg[i];
   let mul=1;
   UPGRADES.filter(u=>u.type==="all"&&G.upg[u.id]).forEach(u=>mul*=u.mul);
-  return ps*mul*G.prest*prestProdMul()*forbiddenAllMul();
+  return ps*mul*G.prest*prestProdMul()*fbAllMul();
 }
 function calcClick(){
   let cp=1;
   UPGRADES.filter(u=>u.type==="click"&&G.upg[u.id]).forEach(u=>cp*=u.mul);
-  return cp*G.prest*prestClickMul()*forbiddenClickMul();
+  return cp*G.prest*prestClickMul()*fbClickMul();
 }
 
 // ── クリックゾーン ──
@@ -1715,11 +1579,9 @@ function doPrestige(){
   if(G.money<thr) return;
   G.prestCount++; G.prest=G.prestCount+1;
   G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0];
-  // 禁断アップグレード（_f_ プレフィックス）は転生後も保持
-  const forbidden={};
-  Object.keys(G.upg).forEach(k=>{ if(k.startsWith('_f_')) forbidden[k]=G.upg[k]; });
-  G.upg=forbidden;
-  G.perSec=0;
+  // _f_ プレフィックスの禁断アップグレードは転生後も保持
+  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')) fb[k]=true;});
+  G.upg=fb; G.perSec=0;
   applyTheme();
   const f=fruit();
   document.getElementById('prest-big-icon').textContent=f.icon;

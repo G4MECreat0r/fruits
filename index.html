@@ -49,9 +49,8 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 .stat-pill  { background: rgba(24,24,44,0.8); border: 1px solid var(--f-border); border-radius: 99px; padding: 5px 13px; font-size: 12px; color: var(--f-muted); }
 .stat-pill strong { color: var(--f-text); font-size: 14px; font-weight: 600; }
 
-#main { display: grid; grid-template-columns: 1fr 310px; gap: 10px; }
-@media(max-width:620px){ #main{grid-template-columns:1fr} }
-#left,#right { display: flex; flex-direction: column; gap: 10px; }
+#main { display: flex; flex-direction: column; gap: 10px; }
+#left { display: flex; flex-direction: column; gap: 10px; }
 
 .card { background: rgba(34,34,58,0.85); border: 1px solid var(--f-border); border-radius: 14px; padding: 14px 16px; backdrop-filter: blur(4px); }
 .card-title { font-size: 13px; font-weight: 600; color: var(--f-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
@@ -239,29 +238,6 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 }
 .shop-ps-fill { height:100%; border-radius:99px; background: linear-gradient(90deg,#c8a020,#ffdd44); transition: width 0.4s; }
 
-/* 実績バー（ヘッダー下横スクロール） */
-#ms-bar-wrap {
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-#ms-bar {
-  display: flex; gap: 6px; overflow-x: auto; padding: 6px 2px;
-  scrollbar-width: none; -ms-overflow-style: none;
-}
-#ms-bar::-webkit-scrollbar { display: none; }
-.ms-chip {
-  flex-shrink: 0; display: flex; align-items: center; gap: 5px;
-  padding: 5px 11px; border-radius: 99px; font-size: 11px; font-weight: 600;
-  background: rgba(30,30,50,0.9); border: 1px solid #2a2a4a; color: #5a5880;
-  white-space: nowrap; transition: all 0.3s;
-}
-.ms-chip.done {
-  background: linear-gradient(135deg,#0d2a18,#1a4228);
-  border-color: #2a5a38; color: #55cc77;
-  box-shadow: 0 0 8px rgba(85,204,119,0.2);
-}
-.ms-chip .chip-icon { font-size: 13px; }
-
 /* 実績 */
 .ms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; max-height: 210px; overflow-y: auto; }
 .ms-item { font-size: 11px; padding: 5px 8px; border-radius: 8px; background: rgba(20,20,31,0.8); color: var(--f-muted); border: 1px solid #22223a; display: flex; align-items: center; gap: 5px; }
@@ -441,6 +417,143 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 }
 #prest-overlay.show #prest-close { animation: textReveal2 0.4s 1.8s ease forwards; }
 #prest-close:hover { transform: scale(1.04); }
+
+/* ══ プレステージリワードパネル ══ */
+.reward-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.reward-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 10px;
+  background: rgba(255,170,68,0.08); border: 1px solid rgba(255,170,68,0.2);
+  font-size: 12px; color: #ccc;
+}
+.reward-item.locked { opacity: 0.4; filter: grayscale(0.6); }
+.reward-item .ri-icon { font-size: 22px; flex-shrink: 0; }
+.reward-item .ri-info { flex: 1; }
+.reward-item .ri-name { font-weight: 700; color: #ffcc66; font-size: 12px; }
+.reward-item .ri-desc { font-size: 11px; color: #aa8844; margin-top: 2px; }
+.reward-item .ri-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+  background: rgba(255,170,68,0.2); color: #ffaa44; border: 1px solid rgba(255,170,68,0.4);
+  white-space: nowrap;
+}
+.reward-item.unlocked .ri-badge { background: rgba(80,200,80,0.2); color: #88ee88; border-color: rgba(80,200,80,0.4); }
+
+/* ══ 自動アップグレードパネル（プレステージ15以上） ══ */
+#auto-card {
+  display: none;
+  border-color: #334488;
+  background: rgba(8,15,30,0.95);
+}
+#auto-card.visible { display: block; }
+#auto-card .card-title { color: #6699ff; }
+
+.auto-mode-row {
+  display: flex; gap: 8px; margin-bottom: 10px;
+}
+.auto-mode-btn {
+  flex: 1; padding: 9px 6px; border-radius: 10px; border: 1.5px solid #334488;
+  background: rgba(20,30,60,0.8); color: #8899cc; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.auto-mode-btn.active {
+  border-color: #6699ff; background: rgba(40,60,120,0.9); color: #aabbff;
+  box-shadow: 0 0 12px rgba(100,150,255,0.3);
+}
+.auto-mode-btn:hover:not(.active) { border-color: #556699; color: #aabbcc; }
+
+#auto-bldg-select {
+  display: none; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+}
+#auto-bldg-select.visible { display: flex; }
+.auto-bldg-chip {
+  padding: 5px 11px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  border: 1.5px solid #334466; background: rgba(20,30,55,0.8); color: #8899bb;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.auto-bldg-chip.selected {
+  border-color: #6699ff; background: rgba(40,70,140,0.9); color: #ccddff;
+  box-shadow: 0 0 8px rgba(100,150,255,0.25);
+}
+.auto-bldg-chip:hover:not(.selected) { border-color: #446688; color: #aabbcc; }
+
+#auto-status {
+  font-size: 11px; color: #6677aa; padding: 8px 12px;
+  background: rgba(10,15,35,0.7); border-radius: 8px; border: 1px solid #222244;
+  min-height: 32px;
+}
+#auto-status.active-pulse { color: #88aaff; animation: autoStatusPulse 2s ease-in-out infinite; }
+@keyframes autoStatusPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+.auto-toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.auto-toggle-label { font-size: 12px; color: #8899cc; }
+.auto-toggle {
+  position: relative; width: 44px; height: 24px; cursor: pointer;
+}
+.auto-toggle input { opacity: 0; width: 0; height: 0; }
+.auto-slider {
+  position: absolute; inset: 0; border-radius: 99px;
+  background: #223; border: 1.5px solid #334; transition: background 0.2s;
+}
+.auto-slider::before {
+  content: ''; position: absolute; width: 18px; height: 18px;
+  left: 2px; top: 2px; border-radius: 50%;
+  background: #556; transition: transform 0.2s, background 0.2s;
+}
+.auto-toggle input:checked + .auto-slider { background: rgba(50,90,180,0.6); border-color: #6699ff; }
+.auto-toggle input:checked + .auto-slider::before { transform: translateX(20px); background: #88aaff; }
+
+/* ══ メニューボタン ══ */
+#menu-bar {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
+  margin-bottom: 10px;
+}
+.menu-btn {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 4px; border-radius: 14px;
+  background: rgba(34,34,58,0.85); border: 1.5px solid var(--f-border);
+  color: var(--f-text); font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: transform 0.12s, border-color 0.2s, box-shadow 0.2s;
+}
+.menu-btn:hover { transform: translateY(-2px); border-color: var(--f-acc); }
+.menu-btn:active { transform: scale(0.96); }
+.menu-icon { font-size: 24px; }
+@media(max-width:380px){ .menu-btn{ font-size:10px; padding:10px 2px; } .menu-icon{ font-size:20px; } }
+.menu-badge {
+  position: absolute; top: -6px; right: -6px;
+  min-width: 20px; height: 20px; border-radius: 99px; padding: 0 5px;
+  background: linear-gradient(135deg,#ff6b6b,#ff4466); color:#fff;
+  font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5); border: 1.5px solid #1a1428;
+}
+
+/* ══ モーダル ══ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: var(--f-card); border: 1px solid var(--f-border);
+  border-radius: 18px 18px 0 0; width: 100%; max-width: 820px;
+  max-height: 82vh; overflow-y: auto; padding: 16px;
+  animation: modalUp 0.25s ease;
+}
+@keyframes modalUp { from{ transform: translateY(40px); opacity:0; } to{ transform: translateY(0); opacity:1; } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; position: sticky; top: 0; background: var(--f-card); padding-bottom: 8px;
+  z-index: 1;
+}
+.modal-title { font-size: 14px; font-weight: 700; color: var(--f-text); }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.08); color: #ccc; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink:0;
+}
+.modal-close:hover { background: rgba(255,255,255,0.16); }
+#ms-grid-full { max-height: none; }
 </style>
 </head>
 <body>
@@ -497,10 +610,24 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
     </div>
   </div>
 
-  <!-- 実績バー -->
-  <div id="ms-bar-wrap" class="card" style="padding:8px 12px;">
-    <div style="font-size:11px;font-weight:600;color:var(--f-muted);margin-bottom:4px;">🏆 実績</div>
-    <div id="ms-bar"></div>
+  <!-- メニューボタン -->
+  <div id="menu-bar">
+    <button class="menu-btn" id="menu-btn-shop" onclick="openModal('shop')">
+      <span class="menu-icon">🏪</span>施設
+      <span class="menu-badge" id="badge-shop" style="display:none"></span>
+    </button>
+    <button class="menu-btn" id="menu-btn-upg" onclick="openModal('upg')">
+      <span class="menu-icon">🔧</span>アップグレード
+      <span class="menu-badge" id="badge-upg" style="display:none"></span>
+    </button>
+    <button class="menu-btn" id="menu-btn-ms" onclick="openModal('ms')">
+      <span class="menu-icon">🏆</span>実績
+      <span class="menu-badge" id="badge-ms"></span>
+    </button>
+    <button class="menu-btn" id="menu-btn-reward" onclick="openModal('reward')">
+      <span class="menu-icon">🎁</span>リワード
+      <span class="menu-badge" id="badge-reward" style="display:none"></span>
+    </button>
   </div>
 
   <div id="main">
@@ -521,20 +648,71 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
         <div id="prest-info">必要: 💰 1兆</div>
         <button id="prest-btn" onclick="doPrestige()" disabled>✨ 転生する（ボーナス獲得）</button>
       </div>
-    </div>
 
-    <div id="right">
-      <div class="card">
-        <div class="card-title">🔧 アップグレード</div>
-        <div class="upg-grid" id="upg-grid"></div>
+      <!-- 自動アップグレードカード（プレステージ15以上） -->
+      <div class="card" id="auto-card">
+        <div class="card-title">🤖 自動アップグレード <span style="font-size:10px;color:#446699;font-weight:400;">Prestige 15+ 限定</span></div>
+        <div class="auto-toggle-row">
+          <span class="auto-toggle-label">⚡ 自動購入 ON/OFF</span>
+          <label class="auto-toggle">
+            <input type="checkbox" id="auto-toggle-chk" onchange="onAutoToggle()">
+            <span class="auto-slider"></span>
+          </label>
+        </div>
+        <div class="auto-mode-row">
+          <button class="auto-mode-btn active" id="auto-mode-upg" onclick="setAutoMode('upgrade')">🔧 アップグレード</button>
+          <button class="auto-mode-btn" id="auto-mode-bldg" onclick="setAutoMode('building')">🏪 施設</button>
+        </div>
+        <div id="auto-bldg-select">
+          <!-- 施設選択チップ（JSで生成） -->
+        </div>
+        <div id="auto-status">自動購入はOFFです</div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- 施設セクション フル幅 -->
-  <div class="card" style="margin-top:10px;">
-    <div class="card-title">🏪 施設（タップで購入）</div>
+<!-- 施設モーダル -->
+<div class="modal-overlay" id="modal-shop" onclick="if(event.target===this) closeModal('shop')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">🏪 施設（タップで購入）</span>
+      <button class="modal-close" onclick="closeModal('shop')">✕</button>
+    </div>
     <div id="shop-items"></div>
+  </div>
+</div>
+
+<!-- アップグレードモーダル -->
+<div class="modal-overlay" id="modal-upg" onclick="if(event.target===this) closeModal('upg')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">🔧 アップグレード</span>
+      <button class="modal-close" onclick="closeModal('upg')">✕</button>
+    </div>
+    <div class="upg-grid" id="upg-grid"></div>
+  </div>
+</div>
+
+<!-- 実績モーダル -->
+<div class="modal-overlay" id="modal-ms" onclick="if(event.target===this) closeModal('ms')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">🏆 実績</span>
+      <button class="modal-close" onclick="closeModal('ms')">✕</button>
+    </div>
+    <div class="ms-grid" id="ms-grid-full"></div>
+  </div>
+</div>
+
+<!-- プレステージリワードモーダル -->
+<div class="modal-overlay" id="modal-reward" onclick="if(event.target===this) closeModal('reward')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">🎁 プレステージリワード</span>
+      <button class="modal-close" onclick="closeModal('reward')">✕</button>
+    </div>
+    <div class="reward-list" id="reward-list"></div>
   </div>
 </div>
 
@@ -832,11 +1010,15 @@ const RANKS = [
 
 const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], upg:{}, mileDone:{}, tick:0, perSec:0 };
 
+// ── 自動アップグレード設定 ──
+const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
+
 // ── セーブ（完全自動）──
 function saveGame(){
   localStorage.setItem('fruitEmpireSave', JSON.stringify({
     money:G.money, total:G.total, prest:G.prest, prestCount:G.prestCount,
-    bldg:G.bldg, upg:G.upg, mileDone:G.mileDone
+    bldg:G.bldg, upg:G.upg, mileDone:G.mileDone,
+    autoEnabled:AUTO.enabled, autoMode:AUTO.mode, autoBldgTarget:AUTO.bldgTarget
   }));
 }
 function loadGame(){
@@ -849,6 +1031,9 @@ function loadGame(){
     G.bldg=d.bldg||[0,0,0,0,0,0,0,0,0];
     G.upg=d.upg||{}; G.mileDone=d.mileDone||{};
     G.perSec=calcPerSec();
+    if(d.autoEnabled !== undefined) AUTO.enabled = d.autoEnabled;
+    if(d.autoMode) AUTO.mode = d.autoMode;
+    if(d.autoBldgTarget !== undefined) AUTO.bldgTarget = d.autoBldgTarget;
   } catch(e){}
 }
 setInterval(saveGame,100);
@@ -860,6 +1045,16 @@ function fmt(n){
   let i=0,v=n;
   while(v>=1e3&&i<suf.length-1){v/=1e3;i++;}
   return v.toFixed(2)+suf[i];
+}
+
+// ── モーダル ──
+function openModal(name){
+  const ov=document.getElementById('modal-'+name);
+  if(ov) ov.classList.add('show');
+}
+function closeModal(name){
+  const ov=document.getElementById('modal-'+name);
+  if(ov) ov.classList.remove('show');
 }
 
 function fruitIdx(){ return Math.min(G.prestCount, FRUITS.length-1); }
@@ -966,8 +1161,10 @@ function renderShop(){
   const el=document.getElementById('shop-items');
   el.innerHTML='';
   const totalPs=BLDGS.reduce((s,b,j)=>s+b.ps*G.bldg[j],0)||1;
+  let canCount=0;
   BLDGS.forEach((b,i)=>{
     const cost=bldgCost(i), can=G.money>=cost, owned=G.bldg[i];
+    if(can) canCount++;
     const share=Math.min(BLDGS[i].ps*owned/totalPs,1);
     const div=document.createElement('div');
     const cls=can?'shop-item can-buy':(owned>0?'shop-item cant':'shop-item cant zero-owned');
@@ -986,16 +1183,28 @@ function renderShop(){
     if(can) div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyBldg(i);});
     el.appendChild(div);
   });
+  const badge=document.getElementById('badge-shop');
+  if(badge){
+    if(canCount>0){ badge.style.display='flex'; badge.textContent=canCount; }
+    else { badge.style.display='none'; }
+  }
 }
 
 // ── アップグレード ──
 function renderUpgrades(){
   const el=document.getElementById('upg-grid');
   const avail=UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
-  if(!avail.length){ el.innerHTML='<p style="font-size:12px;color:#666;grid-column:1/-1;text-align:center;padding:14px">✨ 全取得済み！</p>'; return; }
+  const badge=document.getElementById('badge-upg');
+  if(!avail.length){
+    el.innerHTML='<p style="font-size:12px;color:#666;grid-column:1/-1;text-align:center;padding:14px">✨ 全取得済み！</p>';
+    if(badge) badge.style.display='none';
+    return;
+  }
   el.innerHTML='';
+  let canCount=0;
   avail.forEach(u=>{
     const can=G.money>=u.cost;
+    if(can) canCount++;
     const ico=getUpgIcon(u);
     const typeLabel=u.type==='click'?'TAP':'ALL';
     const typeClass=u.type==='click'?'upg-type-click':'upg-type-all';
@@ -1013,6 +1222,10 @@ function renderUpgrades(){
     if(can) btn.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyUpg(u.id);});
     el.appendChild(btn);
   });
+  if(badge){
+    if(canCount>0){ badge.style.display='flex'; badge.textContent=canCount; }
+    else { badge.style.display='none'; }
+  }
 }
 
 // ── HUD ──
@@ -1043,21 +1256,27 @@ function renderHUD(){
 }
 
 function renderMilestones(){
-  const el=document.getElementById('ms-bar');
-  if(!el) return;
-  el.innerHTML='';
-  // 完了済みを先に、未完了を後に
-  const sorted=[...MILES].sort((a,b)=>{
-    const da=G.mileDone[a.id]?1:0, db=G.mileDone[b.id]?1:0;
-    return db-da;
-  });
-  sorted.forEach(m=>{
-    const done=G.mileDone[m.id];
-    const chip=document.createElement('div');
-    chip.className='ms-chip'+(done?' done':'');
-    chip.innerHTML=`<span class="chip-icon">${done?'✅':'⬜'}</span>${m.txt}`;
-    el.appendChild(chip);
-  });
+  const el=document.getElementById('ms-grid-full');
+  if(el){
+    el.innerHTML='';
+    // 完了済みを先に、未完了を後に
+    const sorted=[...MILES].sort((a,b)=>{
+      const da=G.mileDone[a.id]?1:0, db=G.mileDone[b.id]?1:0;
+      return db-da;
+    });
+    sorted.forEach(m=>{
+      const done=G.mileDone[m.id];
+      const item=document.createElement('div');
+      item.className='ms-item'+(done?' done':'');
+      item.innerHTML=`<span class="chip-icon">${done?'✅':'⬜'}</span>${m.txt}`;
+      el.appendChild(item);
+    });
+  }
+  const badge=document.getElementById('badge-ms');
+  if(badge){
+    const doneCount=MILES.filter(m=>G.mileDone[m.id]).length;
+    badge.textContent=doneCount+'/'+MILES.length;
+  }
 }
 
 function showNotif(txt){
@@ -1203,18 +1422,18 @@ const TUT_STEPS = [
   },
   {
     id: 'upgrade',
-    target: '#upg-grid',
+    target: '#menu-btn-upg',
     title: 'アップグレードしよう！⚡',
-    body: '右側の<strong>アップグレード</strong>を買うと<br>タップ収入や全体生産量がアップ！<br><em>光ってるカード</em>が今買えるもの。<br>ひとつ買ってみよう！',
-    arrow: 'arrow-left',
+    body: 'この<strong>🔧アップグレード</strong>ボタンを押すと<br>タップ収入や全体生産量がアップするアイテムが見られるよ！<br><em>光ってるカード</em>が今買えるもの。<br>ひとつ買ってみよう！',
+    arrow: 'arrow-top',
     waitFor: ()=> Object.keys(G.upg).length >= 1,
     mascot: '⚡',
   },
   {
     id: 'building',
-    target: '#shop-items',
+    target: '#menu-btn-shop',
     title: '施設を建てよう！🏗️',
-    body: '下の<strong>施設</strong>を買うと<br>タップしなくても<em>自動でお金が稼げる</em>！<br>まず<strong>🌱 苗</strong>を1つ買ってみよう！',
+    body: 'この<strong>🏪施設</strong>ボタンを押すと<br>タップしなくても<em>自動でお金が稼げる</em>施設が見られるよ！<br>まず<strong>🌱 苗</strong>を1つ買ってみよう！',
     arrow: 'arrow-top',
     waitFor: ()=> G.bldg.some(b=>b>0),
     mascot: '🌱',
@@ -1230,7 +1449,7 @@ const TUT_STEPS = [
   },
   {
     id: 'more_buildings',
-    target: '#shop-items',
+    target: '#menu-btn-shop',
     title: 'もっと施設を増やそう！🏭',
     body: '施設は<strong>全部で9種類</strong>！<br>高い施設ほど<em>たくさん稼げる</em>。<br>いろんな施設を買い揃えると…<br>なにか<strong>特別なことが起きる</strong>かも？',
     arrow: 'arrow-top',
@@ -1405,7 +1624,115 @@ function tutRefreshHighlight(){
 window.addEventListener('resize', tutRefreshHighlight);
 window.addEventListener('scroll', tutRefreshHighlight, true);
 
-function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
+// ══ プレステージリワード定義 ══
+const PREST_REWARDS = [
+  { minPrest:1,  icon:'💎', name:'強化ボーナスLv1',   desc:'転生ごとにコスト -1% 追加（最大15%）', check:()=>G.prestCount>=1 },
+  { minPrest:3,  icon:'⚡', name:'クリック強化',       desc:'タップ収入 × 1.5 追加ボーナス',         check:()=>G.prestCount>=3 },
+  { minPrest:5,  icon:'🌟', name:'施設コスト割引',     desc:'全施設のベースコスト -20%',              check:()=>G.prestCount>=5 },
+  { minPrest:8,  icon:'🔥', name:'連続転生ブースト',   desc:'毎秒生産量 × 1.2 追加',                 check:()=>G.prestCount>=8 },
+  { minPrest:10, icon:'🌈', name:'レインボーボーナス', desc:'全ボーナス × 1.5（秘伝のレシピ）',      check:()=>G.prestCount>=10 },
+  { minPrest:15, icon:'🤖', name:'自動アップグレード', desc:'アップグレードまたは施設を自動購入！',   check:()=>G.prestCount>=15 },
+];
+
+function renderRewardCard(){
+  const el = document.getElementById('reward-list');
+  if(!el) return;
+  el.innerHTML = '';
+  let unlockedCount = 0;
+  PREST_REWARDS.forEach(r => {
+    const unlocked = G.prestCount >= r.minPrest;
+    if(unlocked) unlockedCount++;
+    const div = document.createElement('div');
+    div.className = 'reward-item' + (unlocked ? ' unlocked' : ' locked');
+    div.innerHTML = `
+      <div class="ri-icon">${r.icon}</div>
+      <div class="ri-info">
+        <div class="ri-name">${r.name}</div>
+        <div class="ri-desc">${r.desc}</div>
+      </div>
+      <div class="ri-badge">${unlocked ? '解放済み' : 'Prest '+r.minPrest+'〜'}</div>`;
+    el.appendChild(div);
+  });
+  const badge=document.getElementById('badge-reward');
+  if(badge){
+    if(unlockedCount>0){ badge.style.display='flex'; badge.textContent=unlockedCount+'/'+PREST_REWARDS.length; }
+    else { badge.style.display='none'; }
+  }
+}
+
+// ══ 自動アップグレードシステム ══
+function renderAutoCard(){
+  const show = G.prestCount >= 15;
+  document.getElementById('auto-card').classList.toggle('visible', show);
+  if(!show) return;
+
+  // トグル状態を反映
+  document.getElementById('auto-toggle-chk').checked = AUTO.enabled;
+
+  // モードボタン
+  document.getElementById('auto-mode-upg').classList.toggle('active', AUTO.mode==='upgrade');
+  document.getElementById('auto-mode-bldg').classList.toggle('active', AUTO.mode==='building');
+
+  // 施設選択チップ
+  const sel = document.getElementById('auto-bldg-select');
+  sel.classList.toggle('visible', AUTO.mode==='building');
+  if(AUTO.mode==='building'){
+    sel.innerHTML = '';
+    BLDGS.forEach((b,i)=>{
+      const chip = document.createElement('div');
+      chip.className = 'auto-bldg-chip' + (AUTO.bldgTarget===i?' selected':'');
+      chip.textContent = b.name.split(' ')[0] + ' ' + b.name.slice(b.name.indexOf(' ')+1);
+      chip.onclick = ()=>{ AUTO.bldgTarget=i; renderAutoCard(); };
+      sel.appendChild(chip);
+    });
+  }
+
+  // ステータス
+  const statusEl = document.getElementById('auto-status');
+  if(!AUTO.enabled){
+    statusEl.textContent = '自動購入はOFFです';
+    statusEl.classList.remove('active-pulse');
+  } else if(AUTO.mode==='upgrade'){
+    statusEl.textContent = '🔧 アップグレードを自動購入中...';
+    statusEl.classList.add('active-pulse');
+  } else {
+    const bName = AUTO.bldgTarget>=0 ? BLDGS[AUTO.bldgTarget].name : '（施設を選択してください）';
+    statusEl.textContent = AUTO.bldgTarget>=0 ? `🏪 ${bName} を自動購入中（1秒1回）` : '⚠️ 施設を選択してください';
+    statusEl.classList.toggle('active-pulse', AUTO.bldgTarget>=0);
+  }
+}
+
+function onAutoToggle(){
+  AUTO.enabled = document.getElementById('auto-toggle-chk').checked;
+  renderAutoCard();
+}
+function setAutoMode(mode){
+  AUTO.mode = mode;
+  renderAutoCard();
+}
+
+// 自動購入タイマー（施設: 1秒1回）
+let autoBldgTimer = 0;
+function tickAutoUpgrade(){
+  if(!AUTO.enabled || G.prestCount < 15) return;
+  if(AUTO.mode === 'upgrade'){
+    // お金があれば一番安い未購入アップグレードを即購入
+    const avail = UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
+    for(const u of avail){
+      if(G.money >= u.cost){ buyUpg(u.id); break; }
+    }
+  } else if(AUTO.mode === 'building'){
+    // 施設は1秒に1回チェック
+    autoBldgTimer++;
+    if(autoBldgTimer < 20) return; // 50ms×20 = 1秒
+    autoBldgTimer = 0;
+    if(AUTO.bldgTarget < 0) return;
+    const cost = bldgCost(AUTO.bldgTarget);
+    if(G.money >= cost) buyBldg(AUTO.bldgTarget);
+  }
+}
+
+function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); renderRewardCard(); renderAutoCard(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
 
 // ── ズーム防止（ダブルタップ） ──
 let lastTap=0;
@@ -1433,9 +1760,10 @@ setInterval(()=>{
   const earn=G.perSec/20;
   G.money+=earn; G.total+=earn;
   G.tick++;
+  tickAutoUpgrade();
   renderHUD();
   if(G.tick%4===0){ renderShop(); renderUpgrades(); }
-  if(G.tick%8===0){ checkMilestones(); }
+  if(G.tick%8===0){ checkMilestones(); renderRewardCard(); renderAutoCard(); }
 },50);
 </script>
 </body>

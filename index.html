@@ -2098,10 +2098,15 @@ let autoBldgTimer = 0;
 function tickAutoUpgrade(){
   if(!AUTO.enabled || G.prestCount < 15) return;
   if(AUTO.mode === 'upgrade'){
-    // お金があれば一番安い未購入アップグレードを即購入
+    // お金があれば一番安い未購入アップグレードを無料で即購入
     const avail = UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
     for(const u of avail){
-      if(G.money >= u.cost){ buyUpg(u.id); break; }
+      if(G.money >= u.cost){
+        G.upg[u.id]=true; // お金は引かない
+        G.perSec=calcPerSec();
+        tick_render();
+        break;
+      }
     }
   } else if(AUTO.mode === 'building'){
     // 施設は1秒に1回チェック
@@ -2110,7 +2115,11 @@ function tickAutoUpgrade(){
     autoBldgTimer = 0;
     if(AUTO.bldgTarget < 0) return;
     const cost = bldgCost(AUTO.bldgTarget);
-    if(G.money >= cost) buyBldg(AUTO.bldgTarget);
+    if(G.money >= cost){
+      G.bldg[AUTO.bldgTarget]++; // お金は引かない
+      G.perSec=calcPerSec();
+      tick_render();
+    }
   }
 }
 

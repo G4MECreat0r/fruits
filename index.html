@@ -278,8 +278,78 @@ body {
 .notif-text { font-size: 12px; }
 .notif-title { font-weight: 700; font-size: 13px; }
 
-/* 施設カードをスクロールなしで表示 */
-#shop-items { max-height: none; overflow: visible; }
+/* ══ チュートリアル ══ */
+#tut-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  pointer-events: none;
+}
+/* スポットライト（穴あきマスク） */
+#tut-mask {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.78);
+  transition: clip-path 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+/* ハイライト枠 */
+#tut-highlight {
+  position: absolute; border-radius: 14px;
+  border: 2.5px solid #ffd93d;
+  box-shadow: 0 0 0 4px rgba(255,217,61,0.18), 0 0 24px rgba(255,217,61,0.35);
+  transition: all 0.45s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+  animation: tutBorder 1.8s ease-in-out infinite;
+}
+@keyframes tutBorder {
+  0%,100%{ box-shadow: 0 0 0 4px rgba(255,217,61,0.18), 0 0 20px rgba(255,217,61,0.3); }
+  50%    { box-shadow: 0 0 0 6px rgba(255,217,61,0.28), 0 0 36px rgba(255,217,61,0.5); }
+}
+/* 吹き出し */
+#tut-bubble {
+  position: absolute; pointer-events: all;
+  background: linear-gradient(145deg, #1e1a38, #2a2450);
+  border: 1.5px solid #5a4aaa;
+  border-radius: 16px; padding: 16px 18px;
+  max-width: 280px; min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07);
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  animation: bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bubbleIn { from{ opacity:0; transform:scale(0.85) translateY(8px); } }
+/* 吹き出し矢印 */
+#tut-bubble::before {
+  content:''; position:absolute; width:12px; height:12px;
+  background: #1e1a38; border: 1.5px solid #5a4aaa;
+  transform: rotate(45deg);
+}
+#tut-bubble.arrow-top::before    { top:-7px; left:24px; border-bottom:none; border-right:none; }
+#tut-bubble.arrow-bottom::before { bottom:-7px; left:24px; border-top:none; border-left:none; }
+#tut-bubble.arrow-left::before   { left:-7px; top:20px; border-right:none; border-top:none; }
+#tut-bubble.arrow-center::before { display:none; }
+
+#tut-mascot { font-size: 32px; margin-bottom: 8px; display: block; animation: mascotBounce 1.2s ease-in-out infinite; }
+@keyframes mascotBounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
+#tut-title  { font-size: 14px; font-weight: 800; color: #ffd93d; margin-bottom: 6px; }
+#tut-body   { font-size: 12px; color: #ccc; line-height: 1.7; margin-bottom: 14px; }
+#tut-body strong { color: #fff; }
+#tut-body em     { color: #aa88ff; font-style: normal; }
+
+#tut-progress { display:flex; gap:5px; margin-bottom:12px; }
+.tut-dot { width:7px; height:7px; border-radius:50%; background:#333; transition: background 0.3s; }
+.tut-dot.active { background: #ffd93d; }
+.tut-dot.done   { background: #7755cc; }
+
+.tut-btn {
+  display:inline-block; padding: 9px 20px; border-radius: 99px; border: none;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: transform 0.1s, opacity 0.15s;
+}
+.tut-btn:active { transform: scale(0.95); }
+#tut-next  { background: linear-gradient(135deg,#6644bb,#9966ff); color:#fff; }
+#tut-skip  { background: transparent; color:#666; font-size:11px; padding:6px 12px; margin-left:4px; }
+#tut-skip:hover { color:#999; }
+
+/* 待機中メッセージ（ユーザーのアクションを待つ） */
+#tut-wait-msg { font-size:11px; color:#aa88ff; margin-top:-8px; margin-bottom:10px; display:none; animation: waitPulse 1.5s ease-in-out infinite; }
+@keyframes waitPulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+
 
 /* 転生オーバーレイ - 豪華版 */
 #prest-overlay {
@@ -369,6 +439,23 @@ body {
 <canvas id="bg-canvas"></canvas>
 
 <div id="notif-container"></div>
+
+<!-- チュートリアルオーバーレイ -->
+<div id="tut-overlay" style="display:none;">
+  <div id="tut-mask"></div>
+  <div id="tut-highlight"></div>
+  <div id="tut-bubble">
+    <span id="tut-mascot">🍓</span>
+    <div id="tut-progress"></div>
+    <div id="tut-title"></div>
+    <div id="tut-body"></div>
+    <div id="tut-wait-msg">👆 実際にやってみよう！</div>
+    <div>
+      <button class="tut-btn" id="tut-next">次へ →</button>
+      <button class="tut-btn" id="tut-skip">スキップ</button>
+    </div>
+  </div>
+</div>
 
 <div id="prest-overlay">
   <canvas id="prest-canvas"></canvas>
@@ -1085,7 +1172,231 @@ function closePrest(){
   if(cvs){ const ctx=cvs.getContext('2d'); ctx.clearRect(0,0,cvs.width,cvs.height); }
 }
 
-function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); checkMilestones(); applyTheme(); }
+// ══ チュートリアルシステム ══
+const TUT_STEPS = [
+  {
+    id: 'welcome',
+    target: null,
+    title: 'ようこそ！🍓',
+    body: 'フルーツファームへようこそ！<br>ここではフルーツを収穫してお金を稼ぎ、<br><strong>大きな農場</strong>を育てていくゲームです。<br>かんたんな説明をするよ！',
+    arrow: 'arrow-center',
+    waitFor: null,
+    mascot: '🍓',
+  },
+  {
+    id: 'click',
+    target: '#fruit-btn-wrap',
+    title: 'タップして収穫！👆',
+    body: '画面中央の<strong>フルーツボタン</strong>をタップすると<br>💰を稼げるよ！<br>まず<em>5回タップ</em>してみよう！',
+    arrow: 'arrow-top',
+    waitFor: ()=> G.total >= 5,
+    mascot: '🖐️',
+  },
+  {
+    id: 'upgrade',
+    target: '#upg-grid',
+    title: 'アップグレードしよう！⚡',
+    body: '右側の<strong>アップグレード</strong>を買うと<br>タップ収入や全体生産量がアップ！<br><em>光ってるカード</em>が今買えるもの。<br>ひとつ買ってみよう！',
+    arrow: 'arrow-left',
+    waitFor: ()=> Object.keys(G.upg).length >= 1,
+    mascot: '⚡',
+  },
+  {
+    id: 'building',
+    target: '#shop-items',
+    title: '施設を建てよう！🏗️',
+    body: '下の<strong>施設</strong>を買うと<br>タップしなくても<em>自動でお金が稼げる</em>！<br>まず<strong>🌱 苗</strong>を1つ買ってみよう！',
+    arrow: 'arrow-top',
+    waitFor: ()=> G.bldg.some(b=>b>0),
+    mascot: '🌱',
+  },
+  {
+    id: 'autoincome',
+    target: '#stat-ps',
+    title: '自動収入を確認！💰',
+    body: '画面上の<strong>毎秒</strong>の数字を見てみよう。<br>施設があると自動でお金が増えていくよ！<br>施設をたくさん買うほど<em>収入が増える</em>。',
+    arrow: 'arrow-top',
+    waitFor: null,
+    mascot: '💰',
+  },
+  {
+    id: 'more_buildings',
+    target: '#shop-items',
+    title: 'もっと施設を増やそう！🏭',
+    body: '施設は<strong>全部で9種類</strong>！<br>高い施設ほど<em>たくさん稼げる</em>。<br>いろんな施設を買い揃えると…<br>なにか<strong>特別なことが起きる</strong>かも？',
+    arrow: 'arrow-top',
+    waitFor: null,
+    mascot: '🏭',
+  },
+  {
+    id: 'hint_prestige',
+    target: null,
+    title: '🤫 ひそかなヒント',
+    body: '実は…<strong>全種類の施設を1つずつ持つ</strong>と<br>隠し機能が解放されるらしい…👀<br><br><em>「転生」</em>すると全部リセットされるけど<br>生産量に<strong>永久ボーナス</strong>がつくって噂！<br>試してみて！',
+    arrow: 'arrow-center',
+    waitFor: null,
+    mascot: '✨',
+  },
+];
+
+let tutStep = 0;
+let tutActive = false;
+let tutWaitInterval = null;
+
+function tutGetEl(selector){
+  if(!selector) return null;
+  return document.querySelector(selector);
+}
+
+function tutHighlight(selector){
+  const hl = document.getElementById('tut-highlight');
+  const mask = document.getElementById('tut-mask');
+  if(!selector){
+    hl.style.display='none';
+    mask.style.background='rgba(0,0,0,0.72)';
+    return;
+  }
+  const el = tutGetEl(selector);
+  if(!el){ hl.style.display='none'; return; }
+  const r = el.getBoundingClientRect();
+  const pad = 8;
+  hl.style.display='block';
+  hl.style.left   = (r.left - pad)+'px';
+  hl.style.top    = (r.top - pad)+'px';
+  hl.style.width  = (r.width + pad*2)+'px';
+  hl.style.height = (r.height + pad*2)+'px';
+}
+
+function tutPositionBubble(step){
+  const bubble = document.getElementById('tut-bubble');
+  bubble.className = 'tut-btn-wrap ' + (step.arrow||'arrow-center');
+  // 矢印クラスだけ付け直す
+  bubble.setAttribute('class', step.arrow||'arrow-center');
+
+  if(!step.target){
+    // 中央
+    bubble.style.left = '50%';
+    bubble.style.top  = '50%';
+    bubble.style.transform = 'translate(-50%,-50%)';
+    return;
+  }
+  const el = tutGetEl(step.target);
+  if(!el){
+    bubble.style.left='50%'; bubble.style.top='50%'; bubble.style.transform='translate(-50%,-50%)';
+    return;
+  }
+  const r = el.getBoundingClientRect();
+  const bw = 280, bh = 220;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  bubble.style.transform = '';
+
+  // 下に出す
+  if(r.bottom + bh + 20 < vh){
+    bubble.style.top  = (r.bottom + 16)+'px';
+    bubble.style.left = Math.max(8, Math.min(r.left, vw-bw-8))+'px';
+    bubble.setAttribute('class','arrow-top');
+  }
+  // 上に出す
+  else if(r.top - bh - 20 > 0){
+    bubble.style.top  = (r.top - bh - 16)+'px';
+    bubble.style.left = Math.max(8, Math.min(r.left, vw-bw-8))+'px';
+    bubble.setAttribute('class','arrow-bottom');
+  }
+  // 右に出す
+  else if(r.right + bw + 20 < vw){
+    bubble.style.top  = Math.max(8, r.top)+'px';
+    bubble.style.left = (r.right + 16)+'px';
+    bubble.setAttribute('class','arrow-left');
+  }
+  else {
+    bubble.style.top  = '50%';
+    bubble.style.left = '50%';
+    bubble.style.transform = 'translate(-50%,-50%)';
+    bubble.setAttribute('class','arrow-center');
+  }
+}
+
+function tutShowStep(idx){
+  if(idx >= TUT_STEPS.length){ tutEnd(); return; }
+  tutStep = idx;
+  const step = TUT_STEPS[idx];
+  const overlay = document.getElementById('tut-overlay');
+  overlay.style.display = 'block';
+
+  // マスコット・タイトル・本文
+  document.getElementById('tut-mascot').textContent = step.mascot || '🍓';
+  document.getElementById('tut-title').textContent  = step.title;
+  document.getElementById('tut-body').innerHTML     = step.body;
+
+  // プログレスドット
+  const prog = document.getElementById('tut-progress');
+  prog.innerHTML = '';
+  TUT_STEPS.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='tut-dot'+(i<idx?' done':i===idx?' active':'');
+    prog.appendChild(d);
+  });
+
+  // ハイライト
+  tutHighlight(step.target);
+  tutPositionBubble(step);
+
+  // ポインターイベント
+  overlay.style.pointerEvents = 'none';
+  document.getElementById('tut-bubble').style.pointerEvents = 'all';
+
+  // waitForがある場合
+  const waitMsg = document.getElementById('tut-wait-msg');
+  const nextBtn = document.getElementById('tut-next');
+  if(step.waitFor){
+    waitMsg.style.display = 'block';
+    nextBtn.style.display = 'none';
+    if(tutWaitInterval) clearInterval(tutWaitInterval);
+    tutWaitInterval = setInterval(()=>{
+      if(step.waitFor()){
+        clearInterval(tutWaitInterval);
+        tutWaitInterval = null;
+        // 少し待ってから次へ
+        setTimeout(()=>tutShowStep(tutStep+1), 600);
+      }
+    }, 200);
+  } else {
+    waitMsg.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  }
+}
+
+function tutEnd(){
+  document.getElementById('tut-overlay').style.display='none';
+  if(tutWaitInterval){ clearInterval(tutWaitInterval); tutWaitInterval=null; }
+  localStorage.setItem('fruitTutDone','1');
+}
+
+function tutInit(){
+  if(localStorage.getItem('fruitTutDone')) return; // 既プレイ
+  if(G.total > 0) return; // セーブデータあり
+
+  document.getElementById('tut-next').addEventListener('click',()=>{
+    tutShowStep(tutStep+1);
+  });
+  document.getElementById('tut-skip').addEventListener('click', tutEnd);
+
+  // ちょっと待ってから開始
+  setTimeout(()=> tutShowStep(0), 800);
+}
+
+// ── 施設購入時にtutHighlightを再計算するために tick_render を拡張 ──
+function tutRefreshHighlight(){
+  if(document.getElementById('tut-overlay').style.display==='none') return;
+  const step = TUT_STEPS[tutStep];
+  if(!step) return;
+  tutHighlight(step.target);
+  tutPositionBubble(step);
+}
+window.addEventListener('resize', tutRefreshHighlight);
+window.addEventListener('scroll', tutRefreshHighlight, true);
+
+function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
 
 // ── 起動 ──
 resizeCvs();
@@ -1094,6 +1405,7 @@ loadGame();
 applyTheme();
 renderMilestones();
 tick_render();
+tutInit();
 
 // ── メインループ ──
 setInterval(()=>{

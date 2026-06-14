@@ -419,6 +419,16 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 #prest-close:hover { transform: scale(1.04); }
 
 /* ══ プレステージリワードパネル ══ */
+.reward-summary {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 6px;
+  margin-bottom: 10px;
+}
+.rs-item {
+  background: rgba(255,170,68,0.1); border: 1px solid rgba(255,170,68,0.25);
+  border-radius: 10px; padding: 8px 10px; text-align: center;
+}
+.rs-val { font-size: 16px; font-weight: 800; color: #ffcc66; }
+.rs-label { font-size: 10px; color: #cc9955; margin-top: 2px; }
 .reward-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .reward-item {
   display: flex; align-items: center; gap: 10px;
@@ -712,6 +722,7 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
       <span class="modal-title">🎁 プレステージリワード</span>
       <button class="modal-close" onclick="closeModal('reward')">✕</button>
     </div>
+    <div id="reward-summary" class="reward-summary"></div>
     <div class="reward-list" id="reward-list"></div>
   </div>
 </div>
@@ -1094,19 +1105,51 @@ function applyTheme(){
   document.getElementById('stage-sub').textContent=`プレステージ ${G.prestCount}回`;
 }
 
-function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest); }
+// ══ プレステージリワード効果 ══
+// m1 (Prest1+): 転生ごとにコスト-1%（最大15%、Prest25+で最大30%）
+function prestCostReduction(){
+  const cap = G.prestCount>=25 ? 0.30 : 0.15;
+  return Math.min(cap, 0.01*G.prestCount);
+}
+// 施設コスト全体の倍率（m1のコスト割引 + m3の-20%）
+function bldgCostMul(){
+  let mul = 1 - prestCostReduction();
+  if(G.prestCount>=5) mul *= 0.8; // m3: 施設コスト割引
+  return mul;
+}
+// 転生に必要な金額（成長率を10倍→5倍に緩和 + m1のコスト割引）
+function prestThreshold(){
+  return 1e12 * Math.pow(5, G.prestCount) * (1 - prestCostReduction());
+}
+// 生産・タップ収入の総合ボーナス倍率
+function prestProdMul(){
+  let mul=1;
+  if(G.prestCount>=8)  mul*=1.2;  // m4: 連続転生ブースト（毎秒生産×1.2）
+  if(G.prestCount>=10) mul*=1.5;  // m5: レインボーボーナス（全ボーナス×1.5）
+  if(G.prestCount>=20) mul*=2;    // m7: 永久シナジーコア
+  return mul;
+}
+function prestClickMul(){
+  let mul=1;
+  if(G.prestCount>=3)  mul*=1.5;  // m2: クリック強化
+  if(G.prestCount>=10) mul*=1.5;  // m5: レインボーボーナス
+  if(G.prestCount>=20) mul*=2;    // m7: 永久シナジーコア
+  return mul;
+}
+
+function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest*bldgCostMul()); }
 
 function calcPerSec(){
   let ps=0;
   for(let i=0;i<BLDGS.length;i++) ps+=BLDGS[i].ps*G.bldg[i];
   let mul=1;
   UPGRADES.filter(u=>u.type==="all"&&G.upg[u.id]).forEach(u=>mul*=u.mul);
-  return ps*mul*G.prest;
+  return ps*mul*G.prest*prestProdMul();
 }
 function calcClick(){
   let cp=1;
   UPGRADES.filter(u=>u.type==="click"&&G.upg[u.id]).forEach(u=>cp*=u.mul);
-  return cp*G.prest;
+  return cp*G.prest*prestClickMul();
 }
 
 // ── クリックゾーン ──
@@ -1241,7 +1284,7 @@ function renderHUD(){
   document.getElementById('prest-card').classList.toggle('visible', allOwned);
 
   if(allOwned){
-    const thr=1e12*Math.pow(10,G.prestCount);
+    const thr=prestThreshold();
     const pct=Math.min(G.money/thr*100,100);
     document.getElementById('prest-bar').style.width=pct+'%';
     const can=G.money>=thr;
@@ -1375,7 +1418,7 @@ function startPrestParticles(){
 }
 
 function doPrestige(){
-  const thr=1e12*Math.pow(10,G.prestCount);
+  const thr=prestThreshold();
   if(G.money<thr) return;
   G.prestCount++; G.prest=G.prestCount+1;
   G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.upg={}; G.perSec=0;
@@ -1632,11 +1675,28 @@ const PREST_REWARDS = [
   { minPrest:8,  icon:'🔥', name:'連続転生ブースト',   desc:'毎秒生産量 × 1.2 追加',                 check:()=>G.prestCount>=8 },
   { minPrest:10, icon:'🌈', name:'レインボーボーナス', desc:'全ボーナス × 1.5（秘伝のレシピ）',      check:()=>G.prestCount>=10 },
   { minPrest:15, icon:'🤖', name:'自動アップグレード', desc:'アップグレードまたは施設を自動購入！',   check:()=>G.prestCount>=15 },
+  { minPrest:20, icon:'🪐', name:'永久シナジーコア',   desc:'全生産・タップ収入 × 2 さらに追加',      check:()=>G.prestCount>=20 },
+  { minPrest:25, icon:'👑', name:'伝説の農場主',       desc:'転生コスト割引が最大30%に拡大',          check:()=>G.prestCount>=25 },
 ];
 
 function renderRewardCard(){
   const el = document.getElementById('reward-list');
   if(!el) return;
+
+  // 現在の効果サマリー
+  const sumEl = document.getElementById('reward-summary');
+  if(sumEl){
+    const costOff = Math.round(prestCostReduction()*100);
+    const bldgOff = Math.round((1-bldgCostMul())*100);
+    const prodMul = (G.prest*prestProdMul()).toFixed(2);
+    const clickMul = (G.prest*prestClickMul()).toFixed(2);
+    sumEl.innerHTML = `
+      <div class="rs-item"><div class="rs-val">×${clickMul}</div><div class="rs-label">タップ倍率</div></div>
+      <div class="rs-item"><div class="rs-val">×${prodMul}</div><div class="rs-label">毎秒生産倍率</div></div>
+      <div class="rs-item"><div class="rs-val">-${costOff}%</div><div class="rs-label">転生コスト割引</div></div>
+      <div class="rs-item"><div class="rs-val">-${bldgOff}%</div><div class="rs-label">施設コスト割引</div></div>`;
+  }
+
   el.innerHTML = '';
   let unlockedCount = 0;
   PREST_REWARDS.forEach(r => {

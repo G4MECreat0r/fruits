@@ -514,7 +514,7 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 
 /* ══ メニューボタン ══ */
 #menu-bar {
-  display: grid; grid-template-columns: repeat(5,1fr); gap: 8px;
+  display: grid; grid-template-columns: repeat(6,1fr); gap: 8px;
   margin-bottom: 10px;
 }
 @media(max-width:420px){ #menu-bar{ grid-template-columns: repeat(3,1fr); } }
@@ -637,6 +637,79 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 .fs-item { text-align:center; }
 .fs-val   { font-size: 16px; font-weight: 800; color: #ff44ff; text-shadow: 0 0 8px #cc00ff; }
 .fs-label { font-size: 9px; color: #9966cc; margin-top: 1px; }
+
+/* ══ 神話の果実マーケット（Prest15+専用） ══ */
+#menu-btn-myth {
+  background: linear-gradient(135deg, #1a1000, #2a1800);
+  border-color: #ffaa00;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s, transform 0.12s, border-color 0.2s;
+  animation: mythPulse 2s ease-in-out infinite;
+}
+#menu-btn-myth.visible { opacity: 1; pointer-events: auto; }
+@keyframes mythPulse {
+  0%,100%{ box-shadow: 0 0 10px rgba(255,170,0,0.5); border-color:#ffaa00; }
+  50%    { box-shadow: 0 0 28px rgba(255,220,50,0.9); border-color:#ffee44; }
+}
+#menu-btn-myth .menu-icon { filter: drop-shadow(0 0 6px #ffcc00); }
+#modal-myth .modal-content {
+  background: linear-gradient(160deg, #1a1000, #2a1800, #0f0800);
+  border: 1px solid #996600;
+}
+#modal-myth .modal-title { color: #ffdd44; text-shadow: 0 0 14px #ffaa00; }
+.myth-intro {
+  background: rgba(150,100,0,0.15); border: 1px solid rgba(255,170,0,0.3);
+  border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #ffcc88;
+  margin-bottom: 12px; line-height: 1.6;
+}
+.myth-intro strong { color: #ffee44; }
+.myth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:400px){ .myth-grid{ grid-template-columns:1fr; } }
+.myth-item {
+  position: relative; overflow: hidden; border-radius: 14px;
+  border: 1.5px solid #664400;
+  background: linear-gradient(160deg, #1a0e00, #2a1a00);
+  padding: 12px 10px; cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.myth-item:hover:not(.mi-locked):not(.mi-owned) {
+  transform: translateY(-2px) scale(1.03); border-color: #ffcc44;
+  box-shadow: 0 6px 24px rgba(255,180,0,0.45);
+}
+.myth-item.mi-can-buy {
+  border-color: #ffaa00; animation: mythCardPulse 1.8s ease-in-out infinite;
+}
+@keyframes mythCardPulse {
+  0%,100%{ box-shadow: 0 0 10px rgba(255,160,0,0.4); }
+  50%    { box-shadow: 0 0 26px rgba(255,220,50,0.8); }
+}
+.myth-item.mi-locked { opacity: 0.3; cursor: default; filter: grayscale(0.6); }
+.myth-item.mi-owned  { opacity: 0.6; cursor: default; border-color: #443300; background: linear-gradient(160deg,#0f0800,#1a1000); }
+.mi-glow-icon { font-size: 34px; margin-bottom: 6px; filter: drop-shadow(0 0 10px #ffaa00); }
+.mi-owned .mi-glow-icon { filter: none; }
+.mi-name   { font-size: 12px; font-weight: 800; color: #ffdd88; margin-bottom: 4px; }
+.mi-owned .mi-name { color: #887755; }
+.mi-effect { font-size: 13px; font-weight: 900; color: #ffcc00; margin-bottom: 6px; text-shadow: 0 0 8px #ff8800; }
+.mi-owned .mi-effect { color: #664400; text-shadow: none; }
+.mi-cost   { font-size: 11px; color: #cc9944; background: rgba(0,0,0,0.4); border-radius: 99px; padding: 3px 10px; }
+.mi-lock-msg { font-size: 10px; color: #553300; }
+.mi-owned-badge {
+  position: absolute; top: 6px; right: 6px; font-size: 9px; font-weight: 700; color: #cc8800;
+  background: rgba(40,20,0,0.8); border: 1px solid #664400; border-radius: 99px; padding: 2px 6px;
+}
+.mi-tier-badge {
+  position: absolute; top: 6px; left: 6px; font-size: 9px; font-weight: 700; color: #ffee44;
+  background: rgba(80,50,0,0.8); border: 1px solid #886600; border-radius: 99px; padding: 2px 6px;
+}
+#myth-summary {
+  background: rgba(120,80,0,0.2); border: 1px solid rgba(255,170,0,0.3);
+  border-radius: 10px; padding: 8px 12px; margin-bottom: 10px;
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.ms2-item { text-align:center; }
+.ms2-val   { font-size: 16px; font-weight: 800; color: #ffcc00; text-shadow: 0 0 8px #ff8800; }
+.ms2-label { font-size: 9px; color: #cc9944; margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -714,6 +787,10 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
     <button class="menu-btn" id="menu-btn-forbidden" onclick="openModal('forbidden')">
       <span class="menu-icon">🍒</span>禁断
       <span class="menu-badge" id="badge-forbidden" style="display:none;background:linear-gradient(135deg,#aa00ff,#ff00cc)"></span>
+    </button>
+    <button class="menu-btn" id="menu-btn-myth" onclick="openModal('myth')">
+      <span class="menu-icon">⚡</span>神話
+      <span class="menu-badge" id="badge-myth" style="display:none;background:linear-gradient(135deg,#ffaa00,#ff6600)"></span>
     </button>
   </div>
 
@@ -817,6 +894,22 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
     </div>
     <div id="forbidden-summary"></div>
     <div class="forbidden-grid" id="forbidden-grid"></div>
+  </div>
+</div>
+
+<!-- 神話の果実マーケット -->
+<div class="modal-overlay" id="modal-myth" onclick="if(event.target===this) closeModal('myth')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">⚡ 神話の果実マーケット</span>
+      <button class="modal-close" onclick="closeModal('myth')">✕</button>
+    </div>
+    <div class="myth-intro">
+      🌟 <strong>15回転生を超えた伝説の農場主だけが触れられる神話の力</strong>。<br>
+      禁断をも超える倍率。一度手にした力は永遠に消えない。
+    </div>
+    <div id="myth-summary"></div>
+    <div class="myth-grid" id="myth-grid"></div>
   </div>
 </div>
 
@@ -1296,17 +1389,80 @@ function renderForbiddenMarket(){
   });
 }
 
+// ══ 神話の果実マーケット（Prest15+専用） ══
+const MYTH = [
+  { id:'m0', tier:1, icon:'🌤️', name:'黎明の実',       desc:'全生産 ×500',         cost:1e20, type:'all',   mul:500,      unlockAfter:null },
+  { id:'m1', tier:1, icon:'⚡',  name:'雷神の果実',     desc:'タップ ×2,000',        cost:5e20, type:'click', mul:2000,     unlockAfter:'m0' },
+  { id:'m2', tier:2, icon:'🌊',  name:'大洪水の種',     desc:'全生産 ×10,000',       cost:1e24, type:'all',   mul:10000,    unlockAfter:'m1' },
+  { id:'m3', tier:2, icon:'🔱',  name:'神の三叉戟',     desc:'タップ ×50,000',       cost:1e27, type:'click', mul:50000,    unlockAfter:'m2' },
+  { id:'m4', tier:3, icon:'🌌',  name:'宇宙樹の実',     desc:'全生産 ×500,000',      cost:1e32, type:'all',   mul:500000,   unlockAfter:'m3' },
+  { id:'m5', tier:3, icon:'👑',  name:'神話の王冠',     desc:'全生産＆タップ ×5,000,000', cost:1e40, type:'both', mul:5000000, unlockAfter:'m4' },
+];
+function isMythUnlocked(m){ if(G.prestCount<15) return false; if(!m.unlockAfter) return true; return !!G.upg['_m_'+m.unlockAfter]; }
+function mythAllMul(){ let v=1; MYTH.forEach(m=>{ if(G.upg['_m_'+m.id]&&(m.type==='all'||m.type==='both')) v*=m.mul; }); return v; }
+function mythClickMul(){ let v=1; MYTH.forEach(m=>{ if(G.upg['_m_'+m.id]&&(m.type==='click'||m.type==='both')) v*=m.mul; }); return v; }
+
+function buyMyth(id){
+  const m=MYTH.find(x=>x.id===id);
+  if(!m||G.money<m.cost||!isMythUnlocked(m)||G.upg['_m_'+id]) return;
+  G.money-=m.cost; G.upg['_m_'+id]=true; G.perSec=calcPerSec();
+  const next=MYTH.find(x=>x.unlockAfter===id);
+  if(next){
+    const c=document.getElementById('notif-container');
+    const t=document.createElement('div');
+    t.className='notif-toast'; t.style.cssText='background:linear-gradient(135deg,#1a1000,#2a1800);border:1px solid #ffaa00;color:#ffdd44';
+    t.innerHTML=`<div class="notif-icon" style="filter:drop-shadow(0 0 8px #ffcc00)">⚡</div><div class="notif-text"><div class="notif-title">神話の力が覚醒した</div>${next.name} が解放！</div>`;
+    c.appendChild(t); setTimeout(()=>{t.classList.add('fadeOut');setTimeout(()=>t.remove(),400);},4000);
+  }
+  tick_render(); renderMythMarket();
+}
+
+function renderMythMarket(){
+  const btn=document.getElementById('menu-btn-myth');
+  if(G.prestCount>=15) btn.classList.add('visible');
+  else { btn.classList.remove('visible'); return; }
+  const badge=document.getElementById('badge-myth');
+  const can=MYTH.filter(m=>isMythUnlocked(m)&&!G.upg['_m_'+m.id]&&G.money>=m.cost).length;
+  if(can>0){badge.style.display='flex';badge.textContent=can;}else{badge.style.display='none';}
+  const grid=document.getElementById('myth-grid');
+  if(!grid) return;
+  grid.innerHTML='';
+  const sumEl=document.getElementById('myth-summary');
+  if(sumEl){
+    const owned=MYTH.filter(m=>G.upg['_m_'+m.id]).length;
+    if(owned>0){
+      sumEl.style.display='flex';
+      sumEl.innerHTML=`<div class="ms2-item"><div class="ms2-val">×${fmt(mythAllMul())}</div><div class="ms2-label">神話生産倍率</div></div>
+        <div class="ms2-item"><div class="ms2-val">×${fmt(mythClickMul())}</div><div class="ms2-label">神話タップ倍率</div></div>
+        <div class="ms2-item"><div class="ms2-val">${owned}/${MYTH.length}</div><div class="ms2-label">取得数</div></div>`;
+    } else { sumEl.style.display='none'; }
+  }
+  MYTH.forEach(m=>{
+    const owned=!!G.upg['_m_'+m.id], unlocked=isMythUnlocked(m), canBuy=unlocked&&!owned&&G.money>=m.cost;
+    const div=document.createElement('div');
+    div.className='myth-item'+(owned?' mi-owned':!unlocked?' mi-locked':canBuy?' mi-can-buy':'');
+    div.innerHTML=`<div class="mi-tier-badge">Tier ${m.tier}</div>
+      ${owned?'<div class="mi-owned-badge">取得済み</div>':''}
+      <div class="mi-glow-icon">${m.icon}</div>
+      <div class="mi-name">${m.name}</div>
+      <div class="mi-effect">${m.desc}</div>
+      ${unlocked&&!owned?`<div class="mi-cost">💰 ${fmt(m.cost)}</div>`:owned?'<div class="mi-cost" style="color:#664400">解放済み</div>':'<div class="mi-lock-msg">🔒 前の神話を取得で解放</div>'}`;
+    if(canBuy) div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyMyth(m.id);});
+    grid.appendChild(div);
+  });
+}
+
 function calcPerSec(){
   let ps=0;
   for(let i=0;i<BLDGS.length;i++) ps+=BLDGS[i].ps*G.bldg[i];
   let mul=1;
   UPGRADES.filter(u=>u.type==="all"&&G.upg[u.id]).forEach(u=>mul*=u.mul);
-  return ps*mul*G.prest*prestProdMul()*fbAllMul();
+  return ps*mul*G.prest*prestProdMul()*fbAllMul()*mythAllMul();
 }
 function calcClick(){
   let cp=1;
   UPGRADES.filter(u=>u.type==="click"&&G.upg[u.id]).forEach(u=>cp*=u.mul);
-  return cp*G.prest*prestClickMul()*fbClickMul();
+  return cp*G.prest*prestClickMul()*fbClickMul()*mythClickMul();
 }
 
 // ── クリックゾーン ──
@@ -1579,8 +1735,8 @@ function doPrestige(){
   if(G.money<thr) return;
   G.prestCount++; G.prest=G.prestCount+1;
   G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0];
-  // _f_ プレフィックスの禁断アップグレードは転生後も保持
-  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')) fb[k]=true;});
+  // _f_ / _m_ プレフィックスの永久アップグレードは転生後も保持
+  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')) fb[k]=true;});
   G.upg=fb; G.perSec=0;
   applyTheme();
   const f=fruit();
@@ -1958,7 +2114,7 @@ function tickAutoUpgrade(){
   }
 }
 
-function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); renderRewardCard(); renderAutoCard(); renderForbiddenMarket(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
+function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); renderRewardCard(); renderAutoCard(); renderForbiddenMarket(); renderMythMarket(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
 
 // ── ズーム防止（ダブルタップ） ──
 let lastTap=0;

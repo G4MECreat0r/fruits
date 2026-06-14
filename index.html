@@ -1019,7 +1019,7 @@ const RANKS = [
   [1e9,"フルーツ実業家"],[1e12,"フルーツ財閥"],[1e15,"フルーツ王"],[1e18,"フルーツ神"]
 ];
 
-const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], upg:{}, mileDone:{}, tick:0, perSec:0 };
+const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], upg:{}, mileDone:{}, rewardClaimed:{}, tick:0, perSec:0 };
 
 // ── 自動アップグレード設定 ──
 const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
@@ -1028,7 +1028,7 @@ const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
 function saveGame(){
   localStorage.setItem('fruitEmpireSave', JSON.stringify({
     money:G.money, total:G.total, prest:G.prest, prestCount:G.prestCount,
-    bldg:G.bldg, upg:G.upg, mileDone:G.mileDone,
+    bldg:G.bldg, upg:G.upg, mileDone:G.mileDone, rewardClaimed:G.rewardClaimed,
     autoEnabled:AUTO.enabled, autoMode:AUTO.mode, autoBldgTarget:AUTO.bldgTarget
   }));
 }
@@ -1040,7 +1040,7 @@ function loadGame(){
     G.money=d.money||0; G.total=d.total||0;
     G.prest=d.prest||1; G.prestCount=d.prestCount||0;
     G.bldg=d.bldg||[0,0,0,0,0,0,0,0,0];
-    G.upg=d.upg||{}; G.mileDone=d.mileDone||{};
+    G.upg=d.upg||{}; G.mileDone=d.mileDone||{}; G.rewardClaimed=d.rewardClaimed||{};
     G.perSec=calcPerSec();
     if(d.autoEnabled !== undefined) AUTO.enabled = d.autoEnabled;
     if(d.autoMode) AUTO.mode = d.autoMode;
@@ -1068,7 +1068,7 @@ function closeModal(name){
   if(ov) ov.classList.remove('show');
 }
 
-function fruitIdx(){ return Math.min(G.prestCount, FRUITS.length-1); }
+function fruitIdx(){ return G.prestCount % FRUITS.length; }
 function fruit(){ return FRUITS[fruitIdx()]; }
 
 // ── 背景エンジン ──
@@ -1669,14 +1669,20 @@ window.addEventListener('scroll', tutRefreshHighlight, true);
 
 // ══ プレステージリワード定義 ══
 const PREST_REWARDS = [
-  { minPrest:1,  icon:'💎', name:'強化ボーナスLv1',   desc:'転生ごとにコスト -1% 追加（最大15%）', check:()=>G.prestCount>=1 },
-  { minPrest:3,  icon:'⚡', name:'クリック強化',       desc:'タップ収入 × 1.5 追加ボーナス',         check:()=>G.prestCount>=3 },
-  { minPrest:5,  icon:'🌟', name:'施設コスト割引',     desc:'全施設のベースコスト -20%',              check:()=>G.prestCount>=5 },
-  { minPrest:8,  icon:'🔥', name:'連続転生ブースト',   desc:'毎秒生産量 × 1.2 追加',                 check:()=>G.prestCount>=8 },
-  { minPrest:10, icon:'🌈', name:'レインボーボーナス', desc:'全ボーナス × 1.5（秘伝のレシピ）',      check:()=>G.prestCount>=10 },
-  { minPrest:15, icon:'🤖', name:'自動アップグレード', desc:'アップグレードまたは施設を自動購入！',   check:()=>G.prestCount>=15 },
-  { minPrest:20, icon:'🪐', name:'永久シナジーコア',   desc:'全生産・タップ収入 × 2 さらに追加',      check:()=>G.prestCount>=20 },
-  { minPrest:25, icon:'👑', name:'伝説の農場主',       desc:'転生コスト割引が最大30%に拡大',          check:()=>G.prestCount>=25 },
+  { id:'r0',  minPrest:1,  icon:'💎', name:'強化ボーナスLv1',    desc:'転生ごとにコスト -1% 追加（最大15%）' },
+  { id:'r1',  minPrest:3,  icon:'⚡', name:'クリック強化',        desc:'タップ収入 × 1.5 追加ボーナス' },
+  { id:'r2',  minPrest:5,  icon:'🌟', name:'施設コスト割引',      desc:'全施設のベースコスト -20%' },
+  { id:'r3',  minPrest:8,  icon:'🔥', name:'連続転生ブースト',    desc:'毎秒生産量 × 1.2 追加' },
+  { id:'r4',  minPrest:10, icon:'🌈', name:'レインボーボーナス',  desc:'全ボーナス × 1.5（秘伝のレシピ）' },
+  { id:'r5',  minPrest:15, icon:'🤖', name:'自動アップグレード',  desc:'アップグレードまたは施設を自動購入！' },
+  { id:'r6',  minPrest:18, icon:'🌀', name:'次元の裂け目',        desc:'毎秒生産量にクリック収入の10%を追加' },
+  { id:'r7',  minPrest:20, icon:'🪐', name:'永久シナジーコア',    desc:'全生産・タップ収入 × 2 さらに追加' },
+  { id:'r8',  minPrest:22, icon:'🦋', name:'蝶の奇跡',           desc:'全施設コスト さらに -10%（積み重ね）' },
+  { id:'r9',  minPrest:25, icon:'👑', name:'伝説の農場主',        desc:'転生コスト割引が最大30%に拡大' },
+  { id:'r10', minPrest:28, icon:'⚗️', name:'賢者の石',           desc:'クリック × 3 追加ボーナス' },
+  { id:'r11', minPrest:30, icon:'🌌', name:'銀河の意志',          desc:'毎秒生産量 × 1.5 さらに追加' },
+  { id:'r12', minPrest:35, icon:'🔱', name:'神話のトライデント',  desc:'全ボーナス × 2（最大強化）' },
+  { id:'r13', minPrest:40, icon:'🏆', name:'究極農場主',          desc:'全生産・タップ × 3 最終強化' },
 ];
 
 function renderRewardCard(){

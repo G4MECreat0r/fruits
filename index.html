@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🍓 フルーツファーム</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,7 +13,15 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
   transition: background 1.2s;
+}
+/* タッチ操作でのズームを完全防止 */
+button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
+  touch-action: manipulation;
+}
+#click-zone {
+  touch-action: manipulation;
 }
 :root {
   --f-card:  #22223a;
@@ -909,6 +917,7 @@ function calcClick(){
 // ── クリックゾーン ──
 const clickZone=document.getElementById('click-zone');
 clickZone.addEventListener('pointerdown',(e)=>{
+  e.preventDefault();
   if(e.target.closest('button')) return;
   clickZone.classList.add('pressing');
   const cp=calcClick();
@@ -916,7 +925,7 @@ clickZone.addEventListener('pointerdown',(e)=>{
   spawnFloat('+'+fmt(cp),e);
   tick_render();
 });
-clickZone.addEventListener('pointerup',()=>clickZone.classList.remove('pressing'));
+clickZone.addEventListener('pointerup',(e)=>{e.preventDefault();clickZone.classList.remove('pressing');});
 clickZone.addEventListener('pointerleave',()=>clickZone.classList.remove('pressing'));
 
 function spawnFloat(txt,e){
@@ -974,7 +983,7 @@ function renderShop(){
         <div class="shop-cost">💰 ${fmt(cost)}</div>
         <div class="shop-ps-bar"><div class="shop-ps-fill" style="width:${(share*100).toFixed(1)}%"></div></div>
       </div>`;
-    if(can) div.addEventListener('pointerdown',(e)=>{e.stopPropagation();buyBldg(i);});
+    if(can) div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyBldg(i);});
     el.appendChild(div);
   });
 }
@@ -1001,7 +1010,7 @@ function renderUpgrades(){
         <div class="upg-desc">${u.desc}</div>
         <div class="upg-cost">💰 ${fmt(u.cost)}</div>
       </div>`;
-    if(can) btn.addEventListener('pointerdown',(e)=>{e.stopPropagation();buyUpg(u.id);});
+    if(can) btn.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyUpg(u.id);});
     el.appendChild(btn);
   });
 }
@@ -1397,6 +1406,17 @@ window.addEventListener('resize', tutRefreshHighlight);
 window.addEventListener('scroll', tutRefreshHighlight, true);
 
 function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
+
+// ── ズーム防止（ダブルタップ） ──
+let lastTap=0;
+document.addEventListener('touchstart',(e)=>{
+  const now=Date.now();
+  if(now-lastTap<350){ e.preventDefault(); }
+  lastTap=now;
+},{passive:false});
+document.addEventListener('touchmove',(e)=>{
+  if(e.touches.length>1) e.preventDefault();
+},{passive:false});
 
 // ── 起動 ──
 resizeCvs();

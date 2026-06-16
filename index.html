@@ -527,6 +527,14 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 }
 #auto2-status.active-pulse { color: #ffaa55; animation: auto2StatusPulse 2s ease-in-out infinite; }
 @keyframes auto2StatusPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+#auto2-buy-desc { font-size: 11px; color: #cc9966; line-height: 1.5; margin-bottom: 10px; }
+#auto2-buy-btn {
+  width: 100%; padding: 10px; border-radius: 10px; border: 1.5px solid #ff9933;
+  background: linear-gradient(135deg, #4a2a00, #6a3a00); color: #ffcc88;
+  font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.15s;
+}
+#auto2-buy-btn:hover { box-shadow: 0 0 14px rgba(255,150,50,0.5); }
+#auto2-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 .auto-toggle {
   position: relative; width: 44px; height: 24px; cursor: pointer;
 }
@@ -917,19 +925,25 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
         <div id="auto-status">自動購入はOFFです</div>
       </div>
 
-      <!-- 上位互換自動購入カード（お金5T以上） -->
+      <!-- 上位互換自動購入カード（5Tで購入解放） -->
       <div class="card" id="auto2-card">
-        <div class="card-title">🛰️ 自動購入Ⅱ <span style="font-size:10px;color:#446699;font-weight:400;">所持金 5T 到達で解放</span></div>
-        <div class="auto-toggle-row">
-          <span class="auto-toggle-label">⚡ 自動購入Ⅱ ON/OFF</span>
-          <label class="auto-toggle">
-            <input type="checkbox" id="auto2-toggle-chk" onchange="onAuto2Toggle()">
-            <span class="auto-slider"></span>
-          </label>
+        <div class="card-title">🛰️ 自動購入Ⅱ <span style="font-size:10px;color:#446699;font-weight:400;">Prestige 15+ 限定・購入制</span></div>
+        <div id="auto2-buy-row">
+          <div id="auto2-buy-desc">💰 5T を支払うと永久に解放される、自動購入Ⅰの上位互換システム。0.2秒ごとに選んだ対象を自動購入できます。</div>
+          <button id="auto2-buy-btn" onclick="buyAuto2()">🛰️ 5T で購入</button>
         </div>
-        <div style="font-size:10px;color:#88aadd;margin-bottom:6px;">0.2秒ごとに選んだ対象を自動購入（自動購入Ⅰと同じ対象は選べません）</div>
-        <div id="auto2-target-select"></div>
-        <div id="auto2-status">自動購入Ⅱは未解放です</div>
+        <div id="auto2-owned-area" style="display:none;">
+          <div class="auto-toggle-row">
+            <span class="auto-toggle-label">⚡ 自動購入Ⅱ ON/OFF</span>
+            <label class="auto-toggle">
+              <input type="checkbox" id="auto2-toggle-chk" onchange="onAuto2Toggle()">
+              <span class="auto-slider"></span>
+            </label>
+          </div>
+          <div style="font-size:10px;color:#88aadd;margin-bottom:6px;">0.2秒ごとに選んだ対象を自動購入（自動購入Ⅰと同じ対象は選べません）</div>
+          <div id="auto2-target-select"></div>
+          <div id="auto2-status">自動購入Ⅱは現在OFFです</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1334,9 +1348,9 @@ const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], b
 
 // ── 自動アップグレード設定 ──
 const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
-// 上位互換自動購入（money>=5e12で解放）：0.2秒ごとに選んだ1対象を即時購入（無料）。AUTOと同じ対象は選べない。
+// 上位互換自動購入（5Tを払って購入すると永久解放）：0.2秒ごとに選んだ1対象を即時購入（無料）。AUTOと同じ対象は選べない。
 const AUTO2 = { enabled: false, target: null }; // target: {kind:'upgrade'} | {kind:'bldg', i} | {kind:'bldg2', i}
-const AUTO2_THRESHOLD = 5e12;
+const AUTO2_COST = 5e12;
 
 // ── セーブ（完全自動）──
 function saveGame(){
@@ -1424,17 +1438,25 @@ function applyTheme(){
 }
 
 // ══ プレステージリワード効果 ══
-// m1 (Prest1+): 転生ごとにコスト-1%（最大15%、Prest25+で最大30%）
+// m1 (Prest1+): 転生ごとにコスト-1%（最大15%、Prest25+で最大30%、Prest35+で最大40%）
 function prestCostReduction(){
   let cap = 0.15;
   if(G.prestCount>=25) cap = 0.30;
   if(G.prestCount>=35) cap = 0.40;
-  return Math.min(cap, 0.01*G.prestCount);
+  let r = Math.min(cap, 0.01*G.prestCount);
+  if(G.prestCount>=6) r += 0.05; // r2b: 投資家精神（追加+5%）
+  return Math.min(r, cap+0.05);
 }
 // 施設コスト全体の倍率（m1のコスト割引 + m3の-20%）
 function bldgCostMul(){
   let mul = 1 - prestCostReduction();
   if(G.prestCount>=5) mul *= 0.8; // m3: 施設コスト割引
+  return mul;
+}
+// 異界施設コストの追加倍率（r4d: 異界建築術）
+function bldg2CostMul(){
+  let mul = bldgCostMul();
+  if(G.prestCount>=13) mul *= 0.85; // r4d: 異界建築術（-15%）
   return mul;
 }
 // 転生に必要な金額
@@ -1452,21 +1474,30 @@ function prestThreshold(){
 // 生産・タップ収入の総合ボーナス倍率
 function prestProdMul(){
   let mul=1;
+  if(G.prestCount>=2)  mul*=1.15; // r0b: 早期ブースト
   if(G.prestCount>=8)  mul*=1.2;  // m4: 連続転生ブースト（毎秒生産×1.2）
   if(G.prestCount>=10) mul*=1.5;  // m5: レインボーボーナス（全ボーナス×1.5）
+  if(G.prestCount>=16) mul*=1.3;  // r6b: 流星の祝福
   if(G.prestCount>=20) mul*=2;    // m7: 永久シナジーコア
+  if(G.prestCount>=32) mul*=1.5;  // r11b: 大地の怒り
+  if(G.prestCount>=45) mul*=1.5;  // r12b: 安寧の境地
+  if(G.prestCount>=50) mul*=2.5;  // r13b: 完全なる調和
   return mul;
 }
 function prestClickMul(){
   let mul=1;
   if(G.prestCount>=3)  mul*=1.5;  // m2: クリック強化
+  if(G.prestCount>=4)  mul*=1.3;  // r1b: 精密収穫
   if(G.prestCount>=10) mul*=1.5;  // m5: レインボーボーナス
   if(G.prestCount>=20) mul*=2;    // m7: 永久シナジーコア
+  if(G.prestCount>=24) mul*=1.4;  // r8b: 自由の翼
+  if(G.prestCount>=45) mul*=1.5;  // r12b: 安寧の境地
+  if(G.prestCount>=50) mul*=2.5;  // r13b: 完全なる調和
   return mul;
 }
 
 function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest*bldgCostMul()); }
-function bldg2Cost(i){ return Math.ceil(BLDGS2[i].base*Math.pow(1.17,G.bldg2[i])/G.prest*bldgCostMul()); }
+function bldg2Cost(i){ return Math.ceil(BLDGS2[i].base*Math.pow(1.17,G.bldg2[i])/G.prest*bldg2CostMul()); }
 
 // ══ 禁断の果実マーケット（Prest10+専用） ══
 const FORBIDDEN = [
@@ -1919,7 +1950,7 @@ function doPrestige(){
   G.prestCount++; G.prest=G.prestCount+1;
   G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.bldg2=[0,0,0,0,0,0];
   // _f_ / _m_ プレフィックスの永久アップグレードは転生後も保持
-  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')) fb[k]=true;});
+  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')||k==='_auto2_owned') fb[k]=true;});
   G.upg=fb; G.perSec=0;
   applyTheme();
   const f=fruit();
@@ -2169,22 +2200,32 @@ window.addEventListener('scroll', tutRefreshHighlight, true);
 // ══ プレステージリワード定義 ══
 const PREST_REWARDS = [
   { id:'r0',  minPrest:1,  icon:'💎', name:'強化ボーナスLv1',    desc:'転生ごとにコスト -1% 追加（最大15%）' },
+  { id:'r0b', minPrest:2,  icon:'🌱', name:'早期ブースト',        desc:'毎秒生産量 × 1.15 追加' },
   { id:'r1',  minPrest:3,  icon:'⚡', name:'クリック強化',        desc:'タップ収入 × 1.5 追加ボーナス' },
+  { id:'r1b', minPrest:4,  icon:'🎯', name:'精密収穫',           desc:'タップ収入 × 1.3 追加ボーナス' },
   { id:'r2',  minPrest:5,  icon:'🌟', name:'施設コスト割引',      desc:'全施設のベースコスト -20%' },
+  { id:'r2b', minPrest:6,  icon:'💰', name:'投資家精神',          desc:'転生コスト割引 さらに +5%' },
   { id:'r3',  minPrest:8,  icon:'🔥', name:'連続転生ブースト',    desc:'毎秒生産量 × 1.2 追加' },
   { id:'r4',  minPrest:10, icon:'🌈', name:'レインボーボーナス',  desc:'全ボーナス × 1.5（秘伝のレシピ）' },
   { id:'r4b', minPrest:10, icon:'🍒', name:'禁断の扉',           desc:'禁断の果実マーケットが解放！' },
   { id:'r4c', minPrest:12, icon:'🔮', name:'異界の扉',           desc:'異界施設群が解放！通常施設を超える生産力' },
+  { id:'r4d', minPrest:13, icon:'🏗️', name:'異界建築術',         desc:'異界施設のコスト さらに -15%' },
   { id:'r5',  minPrest:15, icon:'🤖', name:'自動アップグレード',  desc:'アップグレードまたは施設を自動購入！' },
   { id:'r5b', minPrest:15, icon:'⚡', name:'神話の扉',           desc:'神話の果実マーケットが解放！' },
+  { id:'r5c', minPrest:15, icon:'🛰️', name:'自動購入Ⅱ解放',      desc:'5Tを支払うと購入できる上位互換自動購入が利用可能に' },
+  { id:'r5d', minPrest:16, icon:'🌠', name:'流星の祝福',          desc:'毎秒生産量 × 1.3 追加' },
   { id:'r6',  minPrest:18, icon:'🌀', name:'次元の裂け目',        desc:'毎秒生産量にクリック収入の10%を追加' },
   { id:'r7',  minPrest:20, icon:'🪐', name:'永久シナジーコア',    desc:'全生産・タップ収入 × 2 さらに追加' },
   { id:'r8',  minPrest:22, icon:'🦋', name:'蝶の奇跡',           desc:'全施設コスト さらに -10%（積み重ね）' },
+  { id:'r8b', minPrest:24, icon:'🦅', name:'自由の翼',           desc:'タップ収入 × 1.4 追加ボーナス' },
   { id:'r9',  minPrest:25, icon:'👑', name:'伝説の農場主',        desc:'転生コスト割引が最大30%に拡大' },
   { id:'r10', minPrest:28, icon:'⚗️', name:'賢者の石',           desc:'クリック × 3 追加ボーナス' },
   { id:'r11', minPrest:30, icon:'🌌', name:'銀河の意志',          desc:'毎秒生産量 × 1.5 さらに追加' },
+  { id:'r11b', minPrest:32, icon:'🌋', name:'大地の怒り',         desc:'毎秒生産量 × 1.5 さらに追加' },
   { id:'r12', minPrest:35, icon:'🔱', name:'神話のトライデント',  desc:'全ボーナス × 2（最大強化）' },
+  { id:'r12b', minPrest:45, icon:'🕊️', name:'安寧の境地',         desc:'全生産・タップ × 1.5 さらに追加' },
   { id:'r13', minPrest:40, icon:'🏆', name:'究極農場主',          desc:'全生産・タップ × 3 最終強化' },
+  { id:'r13b', minPrest:50, icon:'☯️', name:'完全なる調和',       desc:'全生産・タップ × 2.5（究極の境地）' },
 ];
 
 function renderRewardCard(){
@@ -2281,17 +2322,28 @@ function setAutoMode(mode){
   renderAuto2Card();
 }
 
-// ══ 自動購入Ⅱ（上位互換・所持金5T以上で解放）══
+// ══ 自動購入Ⅱ（上位互換・5Tで購入解放）══
 function auto2TargetKey(t){
   if(!t) return null;
   if(t.kind==='upgrade') return 'upgrade';
   return t.kind+':'+t.i;
 }
 function renderAuto2Card(){
-  const show = isAuto2Unlocked();
   const card = document.getElementById('auto2-card');
+  const show = G.prestCount >= 15;
   card.classList.toggle('visible', show);
   if(!show) return;
+
+  const owned = isAuto2Unlocked();
+  document.getElementById('auto2-buy-row').style.display = owned ? 'none' : 'block';
+  document.getElementById('auto2-owned-area').style.display = owned ? 'block' : 'none';
+
+  if(!owned){
+    const btn = document.getElementById('auto2-buy-btn');
+    btn.disabled = G.money < AUTO2_COST;
+    btn.textContent = G.money >= AUTO2_COST ? '🛰️ 5T で購入' : `🛰️ 5T で購入（所持金不足：${fmt(G.money)} / ${fmt(AUTO2_COST)}）`;
+    return;
+  }
 
   document.getElementById('auto2-toggle-chk').checked = AUTO2.enabled;
 
@@ -2371,9 +2423,17 @@ function tickAutoUpgrade(){
   }
 }
 
-// 上位互換自動購入：money>=5e12 で解放。0.2秒(4tick)ごとに選択した1対象を無料で即時購入。
+// 上位互換自動購入：5Tを払って購入すると永久解放。0.2秒(4tick)ごとに選択した1対象を無料で即時購入。
 let autoTimer2 = 0;
-function isAuto2Unlocked(){ return G.total >= AUTO2_THRESHOLD || G.money >= AUTO2_THRESHOLD; }
+function isAuto2Unlocked(){ return !!G.upg['_auto2_owned']; }
+function isAuto2Purchasable(){ return !isAuto2Unlocked() && G.money >= AUTO2_COST; }
+function buyAuto2(){
+  if(isAuto2Unlocked() || G.money < AUTO2_COST) return;
+  G.money -= AUTO2_COST;
+  G.upg['_auto2_owned'] = true; // 永久保持（転生でもリセットされない）
+  tick_render();
+  renderAuto2Card();
+}
 function auto2ConflictsWithAuto(target){
   if(!target) return false;
   if(target.kind==='upgrade' && AUTO.enabled && AUTO.mode==='upgrade') return true;

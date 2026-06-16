@@ -496,6 +496,37 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 
 .auto-toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .auto-toggle-label { font-size: 12px; color: #8899cc; }
+
+/* ══ 自動購入Ⅱ（上位互換）══ */
+#auto2-card {
+  display: none;
+  border-color: #885522;
+  background: rgba(30,18,8,0.95);
+  margin-top: 10px;
+}
+#auto2-card.visible { display: block; }
+#auto2-card .card-title { color: #ffaa55; }
+#auto2-target-select {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+}
+.auto2-chip {
+  padding: 5px 11px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  border: 1.5px solid #664422; background: rgba(40,25,10,0.8); color: #cc9966;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.auto2-chip.selected {
+  border-color: #ff9933; background: rgba(90,50,10,0.9); color: #ffddaa;
+  box-shadow: 0 0 8px rgba(255,150,50,0.3);
+}
+.auto2-chip.disabled { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
+.auto2-chip:hover:not(.selected):not(.disabled) { border-color: #aa6633; color: #ffcc99; }
+#auto2-status {
+  font-size: 11px; color: #aa7744; padding: 8px 12px;
+  background: rgba(20,12,5,0.7); border-radius: 8px; border: 1px solid #442200;
+  min-height: 32px;
+}
+#auto2-status.active-pulse { color: #ffaa55; animation: auto2StatusPulse 2s ease-in-out infinite; }
+@keyframes auto2StatusPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
 .auto-toggle {
   position: relative; width: 44px; height: 24px; cursor: pointer;
 }
@@ -514,10 +545,10 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 
 /* ══ メニューボタン ══ */
 #menu-bar {
-  display: grid; grid-template-columns: repeat(6,1fr); gap: 8px;
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 8px;
   margin-bottom: 10px;
 }
-@media(max-width:420px){ #menu-bar{ grid-template-columns: repeat(3,1fr); } }
+@media(max-width:480px){ #menu-bar{ grid-template-columns: repeat(4,1fr); } }
 .menu-btn {
   position: relative;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -710,6 +741,55 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 .ms2-item { text-align:center; }
 .ms2-val   { font-size: 16px; font-weight: 800; color: #ffcc00; text-shadow: 0 0 8px #ff8800; }
 .ms2-label { font-size: 9px; color: #cc9944; margin-top: 1px; }
+
+/* ══ 異界施設群（Prest12+） ══ */
+#menu-btn-shop2 {
+  background: linear-gradient(135deg, #001a1a, #00141a);
+  border-color: #00ddcc;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s, transform 0.12s, border-color 0.2s;
+  animation: shop2Pulse 2.2s ease-in-out infinite;
+}
+#menu-btn-shop2.visible { opacity: 1; pointer-events: auto; }
+@keyframes shop2Pulse {
+  0%,100%{ box-shadow: 0 0 10px rgba(0,220,200,0.5); border-color:#00ddcc; }
+  50%    { box-shadow: 0 0 26px rgba(50,255,230,0.85); border-color:#33ffee; }
+}
+#menu-btn-shop2 .menu-icon { filter: drop-shadow(0 0 6px #00eedd); }
+#modal-shop2 .modal-content {
+  background: linear-gradient(160deg, #001515, #002222, #000d0d);
+  border: 1px solid #006655;
+}
+#modal-shop2 .modal-title { color: #44ffee; text-shadow: 0 0 14px #00ddcc; }
+.shop2-intro {
+  background: rgba(0,120,110,0.15); border: 1px solid rgba(0,220,200,0.3);
+  border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #88eedd;
+  margin-bottom: 12px; line-height: 1.6;
+}
+.shop2-intro strong { color: #44ffee; }
+#shop2-items { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media(max-width:500px){ #shop2-items{ grid-template-columns: repeat(2,1fr); } }
+.shop2-item {
+  position:relative; border-radius:14px; border:1.5px solid #004d44;
+  background: linear-gradient(160deg,#001a18,#002824);
+  padding:10px; cursor:pointer; transition: transform .12s, box-shadow .2s, border-color .2s;
+}
+.shop2-item.s2-can-buy { border-color:#00ddcc; animation: shop2CardPulse 1.8s ease-in-out infinite; }
+@keyframes shop2CardPulse {
+  0%,100%{ box-shadow: 0 0 8px rgba(0,200,180,0.4); }
+  50%    { box-shadow: 0 0 22px rgba(50,255,230,0.7); }
+}
+.shop2-item.s2-cant { opacity:0.45; cursor:default; }
+.shop2-item.s2-locked { opacity:0.25; cursor:default; filter:grayscale(0.7); }
+.s2-count-badge {
+  position:absolute; top:6px; right:6px; font-size:10px; font-weight:800; color:#00ffe0;
+  background:rgba(0,40,36,0.85); border:1px solid #006655; border-radius:99px; padding:2px 7px;
+}
+.s2-ico { font-size:26px; text-align:center; margin-bottom:4px; filter:drop-shadow(0 0 6px #00ddcc); }
+.s2-name { font-size:11px; font-weight:800; color:#88eedd; text-align:center; }
+.s2-desc { font-size:10px; color:#55bbaa; text-align:center; margin-bottom:4px; }
+.s2-cost { font-size:11px; color:#44ffee; background:rgba(0,0,0,0.4); border-radius:99px; padding:3px 10px; text-align:center; }
+.s2-lock-msg { font-size:10px; color:#225550; text-align:center; }
 </style>
 </head>
 <body>
@@ -772,6 +852,10 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
       <span class="menu-icon">🏪</span>施設
       <span class="menu-badge" id="badge-shop" style="display:none"></span>
     </button>
+    <button class="menu-btn" id="menu-btn-shop2" onclick="openModal('shop2')">
+      <span class="menu-icon">🔮</span>異界施設
+      <span class="menu-badge" id="badge-shop2" style="display:none;background:linear-gradient(135deg,#00ddcc,#0099ff)"></span>
+    </button>
     <button class="menu-btn" id="menu-btn-upg" onclick="openModal('upg')">
       <span class="menu-icon">🔧</span>アップグレード
       <span class="menu-badge" id="badge-upg" style="display:none"></span>
@@ -832,6 +916,21 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
         </div>
         <div id="auto-status">自動購入はOFFです</div>
       </div>
+
+      <!-- 上位互換自動購入カード（お金5T以上） -->
+      <div class="card" id="auto2-card">
+        <div class="card-title">🛰️ 自動購入Ⅱ <span style="font-size:10px;color:#446699;font-weight:400;">所持金 5T 到達で解放</span></div>
+        <div class="auto-toggle-row">
+          <span class="auto-toggle-label">⚡ 自動購入Ⅱ ON/OFF</span>
+          <label class="auto-toggle">
+            <input type="checkbox" id="auto2-toggle-chk" onchange="onAuto2Toggle()">
+            <span class="auto-slider"></span>
+          </label>
+        </div>
+        <div style="font-size:10px;color:#88aadd;margin-bottom:6px;">0.2秒ごとに選んだ対象を自動購入（自動購入Ⅰと同じ対象は選べません）</div>
+        <div id="auto2-target-select"></div>
+        <div id="auto2-status">自動購入Ⅱは未解放です</div>
+      </div>
     </div>
   </div>
 </div>
@@ -844,6 +943,21 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
       <button class="modal-close" onclick="closeModal('shop')">✕</button>
     </div>
     <div id="shop-items"></div>
+  </div>
+</div>
+
+<!-- 異界施設モーダル -->
+<div class="modal-overlay" id="modal-shop2" onclick="if(event.target===this) closeModal('shop2')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">🔮 異界施設群</span>
+      <button class="modal-close" onclick="closeModal('shop2')">✕</button>
+    </div>
+    <div class="shop2-intro">
+      🌀 <strong>12回転生した者だけが建てられる異界の施設</strong>。<br>
+      通常施設よりはるかに高い生産力を持つ。
+    </div>
+    <div id="shop2-items"></div>
   </div>
 </div>
 
@@ -1161,6 +1275,16 @@ const BLDGS = [
   { name:"🌌 多次元農業基地", desc:"260000/秒", base:1e11,  ps:260000 },
 ];
 
+// ══ 異界施設群（Prest12+ 専用・通常施設より大幅強化） ══
+const BLDGS2 = [
+  { name:"🔮 異界の祭壇",     desc:"5000/秒",      base:1e10, ps:5000     },
+  { name:"🕳️ 虚空の坑道",    desc:"38000/秒",     base:8e10, ps:38000    },
+  { name:"🧬 遺伝子増幅器",   desc:"290000/秒",    base:6e11, ps:290000   },
+  { name:"🛕 古代神殿",       desc:"2200000/秒",   base:5e12, ps:2200000  },
+  { name:"🌋 火山炉心",       desc:"17000000/秒",  base:4e13, ps:17000000 },
+  { name:"🪐 重力崩壊機構",   desc:"130000000/秒", base:3e14, ps:130000000},
+];
+
 const UPGRADES = [
   { id:"u0",  name:"強化された手",     desc:"クリック×2",    cost:50,    type:"click", mul:2    },
   { id:"u1",  name:"収穫機",           desc:"クリック×5",    cost:500,   type:"click", mul:5    },
@@ -1206,17 +1330,21 @@ const RANKS = [
   [1e24,"禁断の農場主"],[1e30,"🍒 禁断の果実神"]
 ];
 
-const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], upg:{}, mileDone:{}, rewardClaimed:{}, tick:0, perSec:0 };
+const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], bldg2:[0,0,0,0,0,0], upg:{}, mileDone:{}, rewardClaimed:{}, tick:0, perSec:0 };
 
 // ── 自動アップグレード設定 ──
 const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
+// 上位互換自動購入（money>=5e12で解放）：0.2秒ごとに選んだ1対象を即時購入（無料）。AUTOと同じ対象は選べない。
+const AUTO2 = { enabled: false, target: null }; // target: {kind:'upgrade'} | {kind:'bldg', i} | {kind:'bldg2', i}
+const AUTO2_THRESHOLD = 5e12;
 
 // ── セーブ（完全自動）──
 function saveGame(){
   localStorage.setItem('fruitEmpireSave', JSON.stringify({
     money:G.money, total:G.total, prest:G.prest, prestCount:G.prestCount,
-    bldg:G.bldg, upg:G.upg, mileDone:G.mileDone, rewardClaimed:G.rewardClaimed,
-    autoEnabled:AUTO.enabled, autoMode:AUTO.mode, autoBldgTarget:AUTO.bldgTarget
+    bldg:G.bldg, bldg2:G.bldg2, upg:G.upg, mileDone:G.mileDone, rewardClaimed:G.rewardClaimed,
+    autoEnabled:AUTO.enabled, autoMode:AUTO.mode, autoBldgTarget:AUTO.bldgTarget,
+    auto2Enabled:AUTO2.enabled, auto2Target:AUTO2.target
   }));
 }
 function loadGame(){
@@ -1227,11 +1355,14 @@ function loadGame(){
     G.money=d.money||0; G.total=d.total||0;
     G.prest=d.prest||1; G.prestCount=d.prestCount||0;
     G.bldg=d.bldg||[0,0,0,0,0,0,0,0,0];
+    G.bldg2=d.bldg2||[0,0,0,0,0,0];
     G.upg=d.upg||{}; G.mileDone=d.mileDone||{}; G.rewardClaimed=d.rewardClaimed||{};
     G.perSec=calcPerSec();
     if(d.autoEnabled !== undefined) AUTO.enabled = d.autoEnabled;
     if(d.autoMode) AUTO.mode = d.autoMode;
     if(d.autoBldgTarget !== undefined) AUTO.bldgTarget = d.autoBldgTarget;
+    if(d.auto2Enabled !== undefined) AUTO2.enabled = d.auto2Enabled;
+    if(d.auto2Target) AUTO2.target = d.auto2Target;
   } catch(e){}
 }
 setInterval(saveGame,100);
@@ -1295,7 +1426,9 @@ function applyTheme(){
 // ══ プレステージリワード効果 ══
 // m1 (Prest1+): 転生ごとにコスト-1%（最大15%、Prest25+で最大30%）
 function prestCostReduction(){
-  const cap = G.prestCount>=25 ? 0.30 : 0.15;
+  let cap = 0.15;
+  if(G.prestCount>=25) cap = 0.30;
+  if(G.prestCount>=35) cap = 0.40;
   return Math.min(cap, 0.01*G.prestCount);
 }
 // 施設コスト全体の倍率（m1のコスト割引 + m3の-20%）
@@ -1304,9 +1437,17 @@ function bldgCostMul(){
   if(G.prestCount>=5) mul *= 0.8; // m3: 施設コスト割引
   return mul;
 }
-// 転生に必要な金額（成長率を10倍→5倍に緩和 + m1のコスト割引）
+// 転生に必要な金額
+// Prest0-11: ×5/回（従来通り） Prest12以降: ×3/回に緩和（新要素のインフレに合わせてバランス調整）
 function prestThreshold(){
-  return 1e12 * Math.pow(5, G.prestCount) * (1 - prestCostReduction());
+  const n = G.prestCount;
+  let base = 1e12;
+  if(n<=12){
+    base *= Math.pow(5, n);
+  } else {
+    base *= Math.pow(5,12) * Math.pow(3, n-12);
+  }
+  return base * (1 - prestCostReduction());
 }
 // 生産・タップ収入の総合ボーナス倍率
 function prestProdMul(){
@@ -1325,6 +1466,7 @@ function prestClickMul(){
 }
 
 function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest*bldgCostMul()); }
+function bldg2Cost(i){ return Math.ceil(BLDGS2[i].base*Math.pow(1.17,G.bldg2[i])/G.prest*bldgCostMul()); }
 
 // ══ 禁断の果実マーケット（Prest10+専用） ══
 const FORBIDDEN = [
@@ -1455,6 +1597,7 @@ function renderMythMarket(){
 function calcPerSec(){
   let ps=0;
   for(let i=0;i<BLDGS.length;i++) ps+=BLDGS[i].ps*G.bldg[i];
+  for(let i=0;i<BLDGS2.length;i++) ps+=BLDGS2[i].ps*G.bldg2[i];
   let mul=1;
   UPGRADES.filter(u=>u.type==="all"&&G.upg[u.id]).forEach(u=>mul*=u.mul);
   return ps*mul*G.prest*prestProdMul()*fbAllMul()*mythAllMul();
@@ -1540,6 +1683,38 @@ function renderShop(){
     el.appendChild(div);
   });
   const badge=document.getElementById('badge-shop');
+  if(badge){
+    if(canCount>0){ badge.style.display='flex'; badge.textContent=canCount; }
+    else { badge.style.display='none'; }
+  }
+}
+
+function renderShop2(){
+  const btn=document.getElementById('menu-btn-shop2');
+  if(G.prestCount>=12) btn.classList.add('visible');
+  else { btn.classList.remove('visible'); return; }
+
+  const el=document.getElementById('shop2-items');
+  if(!el) return;
+  el.innerHTML='';
+  let canCount=0;
+  BLDGS2.forEach((b,i)=>{
+    const cost=bldg2Cost(i), can=G.money>=cost, owned=G.bldg2[i];
+    if(can) canCount++;
+    const div=document.createElement('div');
+    div.className='shop2-item '+(can?'s2-can-buy':'s2-cant');
+    const ico=b.name.split(' ')[0];
+    const nm=b.name.slice(b.name.indexOf(' ')+1);
+    div.innerHTML=`
+      <div class="s2-count-badge">${owned}</div>
+      <div class="s2-ico">${ico}</div>
+      <div class="s2-name">${nm}</div>
+      <div class="s2-desc">${b.desc}</div>
+      <div class="s2-cost">💰 ${fmt(cost)}</div>`;
+    if(can) div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyBldg2(i);});
+    el.appendChild(div);
+  });
+  const badge=document.getElementById('badge-shop2');
   if(badge){
     if(canCount>0){ badge.style.display='flex'; badge.textContent=canCount; }
     else { badge.style.display='none'; }
@@ -1660,6 +1835,14 @@ function buyBldg(i){
   G.perSec=calcPerSec();
   tick_render();
 }
+function buyBldg2(i){
+  if(G.prestCount<12) return;
+  const cost=bldg2Cost(i);
+  if(G.money<cost) return;
+  G.money-=cost; G.bldg2[i]++;
+  G.perSec=calcPerSec();
+  tick_render();
+}
 function buyUpg(id){
   const u=UPGRADES.find(x=>x.id===id);
   if(!u||G.money<u.cost) return;
@@ -1734,7 +1917,7 @@ function doPrestige(){
   const thr=prestThreshold();
   if(G.money<thr) return;
   G.prestCount++; G.prest=G.prestCount+1;
-  G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0];
+  G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.bldg2=[0,0,0,0,0,0];
   // _f_ / _m_ プレフィックスの永久アップグレードは転生後も保持
   const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')) fb[k]=true;});
   G.upg=fb; G.perSec=0;
@@ -1990,7 +2173,10 @@ const PREST_REWARDS = [
   { id:'r2',  minPrest:5,  icon:'🌟', name:'施設コスト割引',      desc:'全施設のベースコスト -20%' },
   { id:'r3',  minPrest:8,  icon:'🔥', name:'連続転生ブースト',    desc:'毎秒生産量 × 1.2 追加' },
   { id:'r4',  minPrest:10, icon:'🌈', name:'レインボーボーナス',  desc:'全ボーナス × 1.5（秘伝のレシピ）' },
+  { id:'r4b', minPrest:10, icon:'🍒', name:'禁断の扉',           desc:'禁断の果実マーケットが解放！' },
+  { id:'r4c', minPrest:12, icon:'🔮', name:'異界の扉',           desc:'異界施設群が解放！通常施設を超える生産力' },
   { id:'r5',  minPrest:15, icon:'🤖', name:'自動アップグレード',  desc:'アップグレードまたは施設を自動購入！' },
+  { id:'r5b', minPrest:15, icon:'⚡', name:'神話の扉',           desc:'神話の果実マーケットが解放！' },
   { id:'r6',  minPrest:18, icon:'🌀', name:'次元の裂け目',        desc:'毎秒生産量にクリック収入の10%を追加' },
   { id:'r7',  minPrest:20, icon:'🪐', name:'永久シナジーコア',    desc:'全生産・タップ収入 × 2 さらに追加' },
   { id:'r8',  minPrest:22, icon:'🦋', name:'蝶の奇跡',           desc:'全施設コスト さらに -10%（積み重ね）' },
@@ -2087,10 +2273,72 @@ function renderAutoCard(){
 function onAutoToggle(){
   AUTO.enabled = document.getElementById('auto-toggle-chk').checked;
   renderAutoCard();
+  renderAuto2Card();
 }
 function setAutoMode(mode){
   AUTO.mode = mode;
   renderAutoCard();
+  renderAuto2Card();
+}
+
+// ══ 自動購入Ⅱ（上位互換・所持金5T以上で解放）══
+function auto2TargetKey(t){
+  if(!t) return null;
+  if(t.kind==='upgrade') return 'upgrade';
+  return t.kind+':'+t.i;
+}
+function renderAuto2Card(){
+  const show = isAuto2Unlocked();
+  const card = document.getElementById('auto2-card');
+  card.classList.toggle('visible', show);
+  if(!show) return;
+
+  document.getElementById('auto2-toggle-chk').checked = AUTO2.enabled;
+
+  const sel = document.getElementById('auto2-target-select');
+  sel.innerHTML = '';
+
+  // 候補: アップグレード / 通常施設(各) / 異界施設(各)
+  const candidates = [{kind:'upgrade', label:'🔧 アップグレード'}];
+  BLDGS.forEach((b,i)=> candidates.push({kind:'bldg', i, label:b.name.split(' ')[0]+' '+b.name.slice(b.name.indexOf(' ')+1)}));
+  if(G.prestCount>=12){
+    BLDGS2.forEach((b,i)=> candidates.push({kind:'bldg2', i, label:b.name.split(' ')[0]+' '+b.name.slice(b.name.indexOf(' ')+1)}));
+  }
+
+  candidates.forEach(c=>{
+    const conflict = auto2ConflictsWithAuto(c.kind==='upgrade'?{kind:'upgrade'}:{kind:c.kind,i:c.i});
+    const chip = document.createElement('div');
+    const isSelected = auto2TargetKey(AUTO2.target) === auto2TargetKey(c.kind==='upgrade'?{kind:'upgrade'}:{kind:c.kind,i:c.i});
+    chip.className = 'auto2-chip' + (isSelected?' selected':'') + (conflict?' disabled':'');
+    chip.textContent = c.label + (conflict?' (自動Ⅰ使用中)':'');
+    if(!conflict){
+      chip.onclick = ()=>{
+        AUTO2.target = c.kind==='upgrade' ? {kind:'upgrade'} : {kind:c.kind, i:c.i};
+        renderAuto2Card();
+      };
+    }
+    sel.appendChild(chip);
+  });
+
+  const statusEl = document.getElementById('auto2-status');
+  if(!AUTO2.enabled){
+    statusEl.textContent = '自動購入Ⅱは現在OFFです';
+    statusEl.classList.remove('active-pulse');
+  } else if(!AUTO2.target || auto2ConflictsWithAuto(AUTO2.target)){
+    statusEl.textContent = '⚠️ 対象を選択してください（自動購入Ⅰと重複不可）';
+    statusEl.classList.remove('active-pulse');
+  } else {
+    let label='';
+    if(AUTO2.target.kind==='upgrade') label='🔧 アップグレード';
+    else if(AUTO2.target.kind==='bldg') label=BLDGS[AUTO2.target.i].name;
+    else label=BLDGS2[AUTO2.target.i].name;
+    statusEl.textContent = `🛰️ ${label} を自動購入中（0.2秒に1回）`;
+    statusEl.classList.add('active-pulse');
+  }
+}
+function onAuto2Toggle(){
+  AUTO2.enabled = document.getElementById('auto2-toggle-chk').checked;
+  renderAuto2Card();
 }
 
 // 自動購入タイマー（施設: 1秒1回）
@@ -2123,7 +2371,37 @@ function tickAutoUpgrade(){
   }
 }
 
-function tick_render(){ renderHUD(); renderShop(); renderUpgrades(); renderRewardCard(); renderAutoCard(); renderForbiddenMarket(); renderMythMarket(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
+// 上位互換自動購入：money>=5e12 で解放。0.2秒(4tick)ごとに選択した1対象を無料で即時購入。
+let autoTimer2 = 0;
+function isAuto2Unlocked(){ return G.total >= AUTO2_THRESHOLD || G.money >= AUTO2_THRESHOLD; }
+function auto2ConflictsWithAuto(target){
+  if(!target) return false;
+  if(target.kind==='upgrade' && AUTO.enabled && AUTO.mode==='upgrade') return true;
+  if(target.kind==='bldg' && AUTO.enabled && AUTO.mode==='building' && AUTO.bldgTarget===target.i) return true;
+  return false;
+}
+function tickAutoUpgrade2(){
+  if(!AUTO2.enabled || !isAuto2Unlocked()) return;
+  autoTimer2++;
+  if(autoTimer2 < 4) return; // 50ms×4 = 0.2秒
+  autoTimer2 = 0;
+  const t = AUTO2.target;
+  if(!t || auto2ConflictsWithAuto(t)) return;
+  if(t.kind==='upgrade'){
+    const avail = UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
+    for(const u of avail){
+      if(G.money >= u.cost){ G.upg[u.id]=true; G.perSec=calcPerSec(); tick_render(); break; }
+    }
+  } else if(t.kind==='bldg'){
+    const cost = bldgCost(t.i);
+    if(G.money >= cost){ G.bldg[t.i]++; G.perSec=calcPerSec(); tick_render(); }
+  } else if(t.kind==='bldg2'){
+    const cost = bldg2Cost(t.i);
+    if(G.money >= cost){ G.bldg2[t.i]++; G.perSec=calcPerSec(); tick_render(); }
+  }
+}
+
+function tick_render(){ renderHUD(); renderShop(); renderShop2(); renderUpgrades(); renderRewardCard(); renderAutoCard(); renderAuto2Card(); renderForbiddenMarket(); renderMythMarket(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
 
 // ── ズーム防止（ダブルタップ） ──
 let lastTap=0;
@@ -2152,9 +2430,10 @@ setInterval(()=>{
   G.money+=earn; G.total+=earn;
   G.tick++;
   tickAutoUpgrade();
+  tickAutoUpgrade2();
   renderHUD();
-  if(G.tick%4===0){ renderShop(); renderUpgrades(); }
-  if(G.tick%8===0){ checkMilestones(); renderRewardCard(); renderAutoCard(); }
+  if(G.tick%4===0){ renderShop(); renderShop2(); renderUpgrades(); }
+  if(G.tick%8===0){ checkMilestones(); renderRewardCard(); renderAutoCard(); renderAuto2Card(); }
 },50);
 </script>
 </body>

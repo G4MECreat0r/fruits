@@ -114,6 +114,8 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 }
 .upg-btn:active:not(:disabled){ transform: scale(0.96); }
 .upg-btn:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.5); }
+.upg-btn.upg-locked { opacity: 0.3; filter: grayscale(0.8); }
+.upg-btn.upg-locked .upg-cost { color: #ff8866; font-weight:700; }
 
 /* 購入可能時は縁が光る */
 .upg-btn.can-buy {
@@ -461,8 +463,8 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
   display: flex; gap: 8px; margin-bottom: 10px;
 }
 .auto-mode-btn {
-  flex: 1; padding: 9px 6px; border-radius: 10px; border: 1.5px solid #334488;
-  background: rgba(20,30,60,0.8); color: #8899cc; font-size: 12px; font-weight: 700;
+  flex: 1; padding: 9px 4px; border-radius: 10px; border: 1.5px solid #334488;
+  background: rgba(20,30,60,0.8); color: #8899cc; font-size: 11px; font-weight: 700;
   cursor: pointer; transition: all 0.15s; text-align: center;
 }
 .auto-mode-btn.active {
@@ -968,8 +970,10 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
         </div>
         <div class="auto-mode-row">
           <button class="auto-mode-btn active" id="auto-mode-upg" onclick="setAutoMode('upgrade')">🔧 アップグレード</button>
-          <button class="auto-mode-btn" id="auto-mode-bldg" onclick="setAutoMode('building')">🏪 施設</button>
+          <button class="auto-mode-btn" id="auto-mode-bldg" onclick="setAutoMode('building')">🏪 施設(1種)</button>
+          <button class="auto-mode-btn" id="auto-mode-bldgall" onclick="onAutoModeAllClick()">🏭 全施設一括</button>
         </div>
+        <div id="auto-bldgall-desc" style="display:none;font-size:10px;color:#ffaa66;margin-bottom:6px;">💰 100T を支払うと、最初からある施設(BLDGS)を毎秒まとめて自動購入できるようになります（永久解放）</div>
         <div id="auto-bldg-select">
           <!-- 施設選択チップ（JSで生成） -->
         </div>
@@ -1367,35 +1371,35 @@ const BLDGS2 = [
 
 // ══ 天空の工房（Prest65+ 専用・異界施設群を超える最上位施設） ══
 const BLDGS3 = [
-  { name:"☁️ 天空の工房",     desc:"5億/秒",        base:1e18, ps:5e8     },
-  { name:"⛩️ 創世の祭壇",     desc:"42億/秒",        base:9e18, ps:4.2e9   },
-  { name:"🌠 流星工場",       desc:"3.5兆/秒",      base:8e19, ps:3.5e12  },
-  { name:"🕊️ 天使の聖域",     desc:"30兆/秒",       base:7e20, ps:3e13    },
-  { name:"🌞 太陽核精製所",   desc:"260兆/秒",      base:6e21, ps:2.6e14  },
-  { name:"♾️ 永遠の工房",     desc:"2300兆/秒",     base:5e22, ps:2.3e15  },
+  { name:"☁️ 天空の工房",     desc:"1.2億/秒",      base:1e18, ps:1.2e8   },
+  { name:"⛩️ 創世の祭壇",     desc:"9億/秒",        base:9e18, ps:9e8     },
+  { name:"🌠 流星工場",       desc:"7000億/秒",     base:8e19, ps:7e11    },
+  { name:"🕊️ 天使の聖域",     desc:"6兆/秒",        base:7e20, ps:6e12    },
+  { name:"🌞 太陽核精製所",   desc:"55兆/秒",       base:6e21, ps:5.5e13  },
+  { name:"♾️ 永遠の工房",     desc:"450兆/秒",      base:5e22, ps:4.5e14  },
 ];
 
 const UPGRADES = [
-  { id:"u0",  name:"強化された手",     desc:"クリック×2",    cost:50,    type:"click", mul:2    },
-  { id:"u1",  name:"収穫機",           desc:"クリック×5",    cost:500,   type:"click", mul:5    },
-  { id:"u2",  name:"秘伝の肥料",       desc:"全生産×2",     cost:2000,  type:"all",   mul:2    },
-  { id:"u3",  name:"完全自動化",       desc:"クリック×10",   cost:1e4,   type:"click", mul:10   },
-  { id:"u4",  name:"品質保証",         desc:"全生産×3",     cost:5e4,   type:"all",   mul:3    },
-  { id:"u5",  name:"AI農業",           desc:"クリック×25",   cost:5e5,   type:"click", mul:25   },
-  { id:"u6",  name:"量子農法",         desc:"全生産×5",     cost:5e6,   type:"all",   mul:5    },
-  { id:"u7",  name:"宇宙農業",         desc:"全生産×10",    cost:1e9,   type:"all",   mul:10   },
-  { id:"u8",  name:"時間操作",         desc:"クリック×100",  cost:1e10,  type:"click", mul:100  },
-  { id:"u9",  name:"神の農業",         desc:"全生産×20",    cost:1e12,  type:"all",   mul:20   },
-  { id:"u10", name:"魔法の種",         desc:"クリック×3",    cost:150,   type:"click", mul:3    },
-  { id:"u11", name:"太陽光パネル",     desc:"全生産×1.5",   cost:8000,  type:"all",   mul:1.5  },
-  { id:"u12", name:"遺伝子改良",       desc:"全生産×4",     cost:2e5,   type:"all",   mul:4    },
-  { id:"u13", name:"ナノマシン",       desc:"クリック×50",   cost:2e6,   type:"click", mul:50   },
-  { id:"u14", name:"次元農法",         desc:"全生産×8",     cost:5e7,   type:"all",   mul:8    },
-  { id:"u15", name:"時空間圧縮",       desc:"全生産×15",    cost:1e10,  type:"all",   mul:15   },
-  { id:"u16", name:"銀河農業ネット",   desc:"クリック×200",  cost:1e11,  type:"click", mul:200  },
-  { id:"u17", name:"フルーツ霊薬",     desc:"全生産×25",    cost:1e13,  type:"all",   mul:25   },
-  { id:"u18", name:"宇宙意識",         desc:"クリック×500",  cost:1e14,  type:"click", mul:500  },
-  { id:"u19", name:"無限農場",         desc:"全生産×50",    cost:1e15,  type:"all",   mul:50   },
+  { id:"u0",  name:"強化された手",     desc:"クリック×2",    cost:50,    type:"click", mul:2,   unlockPrest:0  },
+  { id:"u10", name:"魔法の種",         desc:"クリック×3",    cost:150,   type:"click", mul:3,   unlockPrest:0  },
+  { id:"u1",  name:"収穫機",           desc:"クリック×5",    cost:500,   type:"click", mul:5,   unlockPrest:0  },
+  { id:"u11", name:"太陽光パネル",     desc:"全生産×1.5",   cost:8000,  type:"all",   mul:1.5, unlockPrest:0  },
+  { id:"u2",  name:"秘伝の肥料",       desc:"全生産×2",     cost:2000,  type:"all",   mul:2,   unlockPrest:1  },
+  { id:"u3",  name:"完全自動化",       desc:"クリック×10",   cost:1e4,   type:"click", mul:10,  unlockPrest:1  },
+  { id:"u4",  name:"品質保証",         desc:"全生産×3",     cost:5e4,   type:"all",   mul:3,   unlockPrest:2  },
+  { id:"u12", name:"遺伝子改良",       desc:"全生産×4",     cost:2e5,   type:"all",   mul:4,   unlockPrest:3  },
+  { id:"u5",  name:"AI農業",           desc:"クリック×25",   cost:5e5,   type:"click", mul:25,  unlockPrest:3  },
+  { id:"u6",  name:"量子農法",         desc:"全生産×5",     cost:5e6,   type:"all",   mul:5,   unlockPrest:4  },
+  { id:"u13", name:"ナノマシン",       desc:"クリック×50",   cost:2e6,   type:"click", mul:50,  unlockPrest:4  },
+  { id:"u14", name:"次元農法",         desc:"全生産×8",     cost:5e7,   type:"all",   mul:8,   unlockPrest:5  },
+  { id:"u7",  name:"宇宙農業",         desc:"全生産×10",    cost:1e9,   type:"all",   mul:10,  unlockPrest:6  },
+  { id:"u8",  name:"時間操作",         desc:"クリック×100",  cost:1e10,  type:"click", mul:100, unlockPrest:7  },
+  { id:"u15", name:"時空間圧縮",       desc:"全生産×15",    cost:1e10,  type:"all",   mul:15,  unlockPrest:7  },
+  { id:"u9",  name:"神の農業",         desc:"全生産×20",    cost:1e12,  type:"all",   mul:20,  unlockPrest:8  },
+  { id:"u16", name:"銀河農業ネット",   desc:"クリック×200",  cost:1e11,  type:"click", mul:200, unlockPrest:8  },
+  { id:"u17", name:"フルーツ霊薬",     desc:"全生産×25",    cost:1e13,  type:"all",   mul:25,  unlockPrest:9  },
+  { id:"u18", name:"宇宙意識",         desc:"クリック×500",  cost:1e14,  type:"click", mul:500, unlockPrest:9  },
+  { id:"u19", name:"無限農場",         desc:"全生産×50",    cost:1e15,  type:"all",   mul:50,  unlockPrest:10 },
 ];
 
 const MILES = [
@@ -1427,6 +1431,8 @@ const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
 // 上位互換自動購入（5Tを払って購入すると永久解放）：0.2秒ごとに選んだ1対象を即時購入（無料）。AUTOと同じ対象は選べない。
 const AUTO2 = { enabled: false, target: null }; // target: {kind:'upgrade'} | {kind:'bldg', i} | {kind:'bldg2', i}
 const AUTO2_COST = 5e12;
+// 自動購入Ⅰ「全施設一括」モード（100Tを払って購入すると永久解放）：毎tick、最初からある施設(BLDGS)を買えるだけ全部購入
+const AUTO_ALL_COST = 1e14; // 100T = 100兆 = 1e14
 
 // ── セーブ（完全自動）──
 function saveGame(){
@@ -1893,7 +1899,7 @@ function renderShop3(){
 // ── アップグレード ──
 function renderUpgrades(){
   const el=document.getElementById('upg-grid');
-  const avail=UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
+  const avail=UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>(a.unlockPrest-b.unlockPrest)||(a.cost-b.cost));
   const badge=document.getElementById('badge-upg');
   if(!avail.length){
     el.innerHTML='<p style="font-size:12px;color:#666;grid-column:1/-1;text-align:center;padding:14px">✨ 全取得済み！</p>';
@@ -1903,15 +1909,23 @@ function renderUpgrades(){
   el.innerHTML='';
   let canCount=0;
   avail.forEach(u=>{
-    const can=G.money>=u.cost;
+    const locked=G.prestCount<u.unlockPrest;
+    const can=!locked&&G.money>=u.cost;
     if(can) canCount++;
     const ico=getUpgIcon(u);
     const typeLabel=u.type==='click'?'TAP':'ALL';
     const typeClass=u.type==='click'?'upg-type-click':'upg-type-all';
     const btn=document.createElement('button');
-    btn.className='upg-btn'+(can?' can-buy':'');
+    btn.className='upg-btn'+(can?' can-buy':'')+(locked?' upg-locked':'');
     btn.disabled=!can;
-    btn.innerHTML=`
+    btn.innerHTML=locked?`
+      <span class="upg-type-badge ${typeClass}">${typeLabel}</span>
+      <div class="upg-inner">
+        <div class="upg-icon-wrap">🔒</div>
+        <div class="upg-name">${u.name}</div>
+        <div class="upg-desc">${u.desc}</div>
+        <div class="upg-cost">🔒 プレステージ ${u.unlockPrest} で解放</div>
+      </div>` : `
       <span class="upg-type-badge ${typeClass}">${typeLabel}</span>
       <div class="upg-inner">
         <div class="upg-icon-wrap">${ico}</div>
@@ -2022,7 +2036,7 @@ function buyBldg3(i){
 }
 function buyUpg(id){
   const u=UPGRADES.find(x=>x.id===id);
-  if(!u||G.money<u.cost) return;
+  if(!u||G.money<u.cost||G.prestCount<u.unlockPrest) return;
   G.money-=u.cost; G.upg[id]=true;
   G.perSec=calcPerSec();
   tick_render();
@@ -2112,7 +2126,7 @@ function doPrestige(){
   G.prestCount++; G.prest=prestBonusFromCount(G.prestCount);
   G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.bldg2=[0,0,0,0,0,0]; G.bldg3=[0,0,0,0,0,0];
   // _f_ / _m_ プレフィックスの永久アップグレードは転生後も保持
-  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')||k==='_auto2_owned') fb[k]=true;});
+  const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')||k==='_auto2_owned'||k==='_autoAll_owned') fb[k]=true;});
   G.upg=fb; G.perSec=0;
   applyTheme();
   const f=fruit();
@@ -2432,6 +2446,23 @@ function renderRewardCard(){
 }
 
 // ══ 自動アップグレードシステム ══
+function isAutoAllUnlocked(){ return !!G.upg['_autoAll_owned']; }
+function buyAutoAll(){
+  if(isAutoAllUnlocked() || G.money < AUTO_ALL_COST) return;
+  G.money -= AUTO_ALL_COST;
+  G.upg['_autoAll_owned'] = true; // 永久保持
+  AUTO.mode = 'buildingAll';
+  tick_render();
+  renderAutoCard();
+}
+function onAutoModeAllClick(){
+  if(isAutoAllUnlocked()){
+    setAutoMode('buildingAll');
+  } else {
+    buyAutoAll();
+  }
+}
+
 function renderAutoCard(){
   const show = G.prestCount >= 15;
   document.getElementById('auto-card').classList.toggle('visible', show);
@@ -2443,8 +2474,17 @@ function renderAutoCard(){
   // モードボタン
   document.getElementById('auto-mode-upg').classList.toggle('active', AUTO.mode==='upgrade');
   document.getElementById('auto-mode-bldg').classList.toggle('active', AUTO.mode==='building');
+  const allBtn = document.getElementById('auto-mode-bldgall');
+  const allOwned = isAutoAllUnlocked();
+  allBtn.classList.toggle('active', AUTO.mode==='buildingAll');
+  allBtn.textContent = allOwned ? '🏭 全施設一括' : `🔒 全施設一括（100T）`;
+  document.getElementById('auto-bldgall-desc').style.display = allOwned ? 'none' : 'block';
+  if(!allOwned){
+    document.getElementById('auto-bldgall-desc').textContent =
+      `💰 100T を支払うと、最初からある施設(BLDGS)を毎秒まとめて自動購入できるようになります（永久解放）。現在の所持金: ${fmt(G.money)} / 必要: ${fmt(AUTO_ALL_COST)}`;
+  }
 
-  // 施設選択チップ
+  // 施設選択チップ（個別選択モードの時だけ）
   const sel = document.getElementById('auto-bldg-select');
   sel.classList.toggle('visible', AUTO.mode==='building');
   if(AUTO.mode==='building'){
@@ -2466,6 +2506,14 @@ function renderAutoCard(){
   } else if(AUTO.mode==='upgrade'){
     statusEl.textContent = '🔧 アップグレードを自動購入中...';
     statusEl.classList.add('active-pulse');
+  } else if(AUTO.mode==='buildingAll'){
+    if(allOwned){
+      statusEl.textContent = '🏭 最初からある施設を全種類まとめて自動購入中（毎秒）';
+      statusEl.classList.add('active-pulse');
+    } else {
+      statusEl.textContent = '⚠️ 100T を支払って解放してください';
+      statusEl.classList.remove('active-pulse');
+    }
   } else {
     const bName = AUTO.bldgTarget>=0 ? BLDGS[AUTO.bldgTarget].name : '（施設を選択してください）';
     statusEl.textContent = AUTO.bldgTarget>=0 ? `🏪 ${bName} を自動購入中（1秒1回）` : '⚠️ 施設を選択してください';
@@ -2565,7 +2613,7 @@ function tickAutoUpgrade(){
   if(!AUTO.enabled || G.prestCount < 15) return;
   if(AUTO.mode === 'upgrade'){
     // お金があれば一番安い未購入アップグレードを無料で即購入
-    const avail = UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
+    const avail = UPGRADES.filter(u=>!G.upg[u.id]&&G.prestCount>=u.unlockPrest).sort((a,b)=>a.cost-b.cost);
     for(const u of avail){
       if(G.money >= u.cost){
         G.upg[u.id]=true; // お金は引かない
@@ -2583,6 +2631,24 @@ function tickAutoUpgrade(){
     const cost = bldgCost(AUTO.bldgTarget);
     if(G.money >= cost){
       G.bldg[AUTO.bldgTarget]++; // お金は引かない
+      G.perSec=calcPerSec();
+      tick_render();
+    }
+  } else if(AUTO.mode === 'buildingAll'){
+    if(!isAutoAllUnlocked()) return;
+    // 1秒に1回、最初からある施設(BLDGS)を買えるものは全部まとめて購入（お金は引かない）
+    autoBldgTimer++;
+    if(autoBldgTimer < 20) return; // 50ms×20 = 1秒
+    autoBldgTimer = 0;
+    let bought = false;
+    for(let i=0;i<BLDGS.length;i++){
+      const cost = bldgCost(i);
+      if(G.money >= cost){
+        G.bldg[i]++; // お金は引かない
+        bought = true;
+      }
+    }
+    if(bought){
       G.perSec=calcPerSec();
       tick_render();
     }
@@ -2604,6 +2670,7 @@ function auto2ConflictsWithAuto(target){
   if(!target) return false;
   if(target.kind==='upgrade' && AUTO.enabled && AUTO.mode==='upgrade') return true;
   if(target.kind==='bldg' && AUTO.enabled && AUTO.mode==='building' && AUTO.bldgTarget===target.i) return true;
+  if(target.kind==='bldg' && AUTO.enabled && AUTO.mode==='buildingAll' && isAutoAllUnlocked()) return true;
   return false;
 }
 function tickAutoUpgrade2(){
@@ -2614,7 +2681,7 @@ function tickAutoUpgrade2(){
   const t = AUTO2.target;
   if(!t || auto2ConflictsWithAuto(t)) return;
   if(t.kind==='upgrade'){
-    const avail = UPGRADES.filter(u=>!G.upg[u.id]).sort((a,b)=>a.cost-b.cost);
+    const avail = UPGRADES.filter(u=>!G.upg[u.id]&&G.prestCount>=u.unlockPrest).sort((a,b)=>a.cost-b.cost);
     for(const u of avail){
       if(G.money >= u.cost){ G.upg[u.id]=true; G.perSec=calcPerSec(); tick_render(); break; }
     }

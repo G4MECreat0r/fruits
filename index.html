@@ -553,7 +553,7 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 
 /* ══ メニューボタン ══ */
 #menu-bar {
-  display: grid; grid-template-columns: repeat(7,1fr); gap: 8px;
+  display: grid; grid-template-columns: repeat(8,1fr); gap: 8px;
   margin-bottom: 10px;
 }
 @media(max-width:480px){ #menu-bar{ grid-template-columns: repeat(4,1fr); } }
@@ -798,6 +798,53 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
 .s2-desc { font-size:10px; color:#55bbaa; text-align:center; margin-bottom:4px; }
 .s2-cost { font-size:11px; color:#44ffee; background:rgba(0,0,0,0.4); border-radius:99px; padding:3px 10px; text-align:center; }
 .s2-lock-msg { font-size:10px; color:#225550; text-align:center; }
+
+/* ══ 天空の工房（Prest65+） ══ */
+#menu-btn-shop3 {
+  background: linear-gradient(135deg, #1a1500, #221a00);
+  border-color: #ffd700;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s, transform 0.12s, border-color 0.2s;
+  animation: shop3Pulse 2.4s ease-in-out infinite;
+}
+#menu-btn-shop3.visible { opacity: 1; pointer-events: auto; }
+@keyframes shop3Pulse {
+  0%,100%{ box-shadow: 0 0 12px rgba(255,215,0,0.5); border-color:#ffd700; }
+  50%    { box-shadow: 0 0 30px rgba(255,240,120,0.9); border-color:#fff066; }
+}
+#menu-btn-shop3 .menu-icon { filter: drop-shadow(0 0 6px #ffe066); }
+#modal-shop3 .modal-content {
+  background: linear-gradient(160deg, #1a1500, #221c00, #100c00);
+  border: 1px solid #997700;
+}
+#modal-shop3 .modal-title { color: #ffe066; text-shadow: 0 0 16px #ffd700; }
+.shop3-intro {
+  background: rgba(150,120,0,0.15); border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #ffe699;
+  margin-bottom: 12px; line-height: 1.6;
+}
+.shop3-intro strong { color: #ffe066; }
+#shop3-items { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media(max-width:500px){ #shop3-items{ grid-template-columns: repeat(2,1fr); } }
+.shop3-item {
+  position:relative; border-radius:14px; border:1.5px solid #665200;
+  background: linear-gradient(160deg,#1a1500,#241d00);
+  padding:10px; cursor:pointer; transition: transform .12s, box-shadow .2s, border-color .2s;
+}
+.shop3-item.s3-can-buy { border-color:#ffd700; animation: shop3CardPulse 1.8s ease-in-out infinite; }
+@keyframes shop3CardPulse {
+  0%,100%{ box-shadow: 0 0 9px rgba(255,210,0,0.4); }
+  50%    { box-shadow: 0 0 24px rgba(255,240,120,0.75); }
+}
+.shop3-item.s3-cant { opacity:0.45; cursor:default; }
+.s3-count-badge {
+  position:absolute; top:6px; right:6px; font-size:10px; font-weight:800; color:#ffe066;
+  background:rgba(40,32,0,0.85); border:1px solid #665200; border-radius:99px; padding:2px 7px;
+}
+.s3-ico { font-size:26px; text-align:center; margin-bottom:4px; filter:drop-shadow(0 0 6px #ffd700); }
+.s3-name { font-size:11px; font-weight:800; color:#ffe699; text-align:center; }
+.s3-desc { font-size:10px; color:#cca838; text-align:center; margin-bottom:4px; }
+.s3-cost { font-size:11px; color:#ffe066; background:rgba(0,0,0,0.4); border-radius:99px; padding:3px 10px; text-align:center; }
 </style>
 </head>
 <body>
@@ -863,6 +910,10 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
     <button class="menu-btn" id="menu-btn-shop2" onclick="openModal('shop2')">
       <span class="menu-icon">🔮</span>異界施設
       <span class="menu-badge" id="badge-shop2" style="display:none;background:linear-gradient(135deg,#00ddcc,#0099ff)"></span>
+    </button>
+    <button class="menu-btn" id="menu-btn-shop3" onclick="openModal('shop3')">
+      <span class="menu-icon">☁️</span>天空工房
+      <span class="menu-badge" id="badge-shop3" style="display:none;background:linear-gradient(135deg,#ffd700,#ff8800)"></span>
     </button>
     <button class="menu-btn" id="menu-btn-upg" onclick="openModal('upg')">
       <span class="menu-icon">🔧</span>アップグレード
@@ -972,6 +1023,21 @@ button, .shop-item, .upg-btn, #click-zone, .ms-chip, .tut-btn {
       通常施設よりはるかに高い生産力を持つ。
     </div>
     <div id="shop2-items"></div>
+  </div>
+</div>
+
+<!-- 天空の工房モーダル -->
+<div class="modal-overlay" id="modal-shop3" onclick="if(event.target===this) closeModal('shop3')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title">☁️ 天空の工房</span>
+      <button class="modal-close" onclick="closeModal('shop3')">✕</button>
+    </div>
+    <div class="shop3-intro">
+      ⛩️ <strong>65回転生した者だけが到達できる天界の工房</strong>。<br>
+      異界施設群すら超える、宇宙最強クラスの生産力を誇る。
+    </div>
+    <div id="shop3-items"></div>
   </div>
 </div>
 
@@ -1299,6 +1365,16 @@ const BLDGS2 = [
   { name:"🪐 重力崩壊機構",   desc:"130000000/秒", base:3e14, ps:130000000},
 ];
 
+// ══ 天空の工房（Prest65+ 専用・異界施設群を超える最上位施設） ══
+const BLDGS3 = [
+  { name:"☁️ 天空の工房",     desc:"5億/秒",        base:1e18, ps:5e8     },
+  { name:"⛩️ 創世の祭壇",     desc:"42億/秒",        base:9e18, ps:4.2e9   },
+  { name:"🌠 流星工場",       desc:"3.5兆/秒",      base:8e19, ps:3.5e12  },
+  { name:"🕊️ 天使の聖域",     desc:"30兆/秒",       base:7e20, ps:3e13    },
+  { name:"🌞 太陽核精製所",   desc:"260兆/秒",      base:6e21, ps:2.6e14  },
+  { name:"♾️ 永遠の工房",     desc:"2300兆/秒",     base:5e22, ps:2.3e15  },
+];
+
 const UPGRADES = [
   { id:"u0",  name:"強化された手",     desc:"クリック×2",    cost:50,    type:"click", mul:2    },
   { id:"u1",  name:"収穫機",           desc:"クリック×5",    cost:500,   type:"click", mul:5    },
@@ -1344,7 +1420,7 @@ const RANKS = [
   [1e24,"禁断の農場主"],[1e30,"🍒 禁断の果実神"]
 ];
 
-const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], bldg2:[0,0,0,0,0,0], upg:{}, mileDone:{}, rewardClaimed:{}, tick:0, perSec:0 };
+const G = { money:0, total:0, prest:1, prestCount:0, bldg:[0,0,0,0,0,0,0,0,0], bldg2:[0,0,0,0,0,0], bldg3:[0,0,0,0,0,0], upg:{}, mileDone:{}, rewardClaimed:{}, tick:0, perSec:0 };
 
 // ── 自動アップグレード設定 ──
 const AUTO = { enabled: false, mode: 'upgrade', bldgTarget: -1 };
@@ -1356,7 +1432,7 @@ const AUTO2_COST = 5e12;
 function saveGame(){
   localStorage.setItem('fruitEmpireSave', JSON.stringify({
     money:G.money, total:G.total, prest:G.prest, prestCount:G.prestCount,
-    bldg:G.bldg, bldg2:G.bldg2, upg:G.upg, mileDone:G.mileDone, rewardClaimed:G.rewardClaimed,
+    bldg:G.bldg, bldg2:G.bldg2, bldg3:G.bldg3, upg:G.upg, mileDone:G.mileDone, rewardClaimed:G.rewardClaimed,
     autoEnabled:AUTO.enabled, autoMode:AUTO.mode, autoBldgTarget:AUTO.bldgTarget,
     auto2Enabled:AUTO2.enabled, auto2Target:AUTO2.target
   }));
@@ -1367,9 +1443,11 @@ function loadGame(){
     if(!raw) return;
     const d=JSON.parse(raw);
     G.money=d.money||0; G.total=d.total||0;
-    G.prest=d.prest||1; G.prestCount=d.prestCount||0;
+    G.prestCount=d.prestCount||0;
+    G.prest=prestBonusFromCount(G.prestCount);
     G.bldg=d.bldg||[0,0,0,0,0,0,0,0,0];
     G.bldg2=d.bldg2||[0,0,0,0,0,0];
+    G.bldg3=d.bldg3||[0,0,0,0,0,0];
     G.upg=d.upg||{}; G.mileDone=d.mileDone||{}; G.rewardClaimed=d.rewardClaimed||{};
     G.perSec=calcPerSec();
     if(d.autoEnabled !== undefined) AUTO.enabled = d.autoEnabled;
@@ -1384,9 +1462,19 @@ setInterval(saveGame,100);
 // ── ユーティリティ ──
 function fmt(n){
   if(n<1e3) return Math.floor(n).toLocaleString();
-  const suf=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Td"];
+  const suf=[
+    "","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No",          // 10^0 ~ 10^30
+    "Dc","UDc","DDc","TDc","QaDc","QiDc","SxDc","SpDc","OcDc","NoDc", // 10^33 ~ 10^60
+    "Vg","UVg","DVg","TVg","QaVg","QiVg","SxVg","SpVg","OcVg","NoVg", // 10^63 ~ 10^90
+    "Tg","UTg","DTg","TTg","QaTg","QiTg","SxTg","SpTg","OcTg","NoTg", // 10^93 ~ 10^120
+    "Qd","UQd","DQd","TQd","QaQd","QiQd","SxQd","SpQd","OcQd","NoQd", // 10^123 ~ 10^150
+  ];
   let i=0,v=n;
-  while(v>=1e3&&i<suf.length-1){v/=1e3;i++;}
+  while(v>=1e3 && i<suf.length-1){ v/=1e3; i++; }
+  if(i>=suf.length-1 && v>=1e3){
+    // 単位表を超えた超巨大数は指数表記にフォールバック
+    return n.toExponential(2).replace('e+','e');
+  }
   return v.toFixed(2)+suf[i];
 }
 
@@ -1459,15 +1547,21 @@ function bldg2CostMul(){
   if(G.prestCount>=13) mul *= 0.85; // r4d: 異界建築術（-15%）
   return mul;
 }
+// 天空の工房コストの倍率
+function bldg3CostMul(){
+  return bldgCostMul();
+}
 // 転生に必要な金額
-// Prest0-11: ×5/回（従来通り） Prest12以降: ×3/回に緩和（新要素のインフレに合わせてバランス調整）
+// Prest0-12: ×5/回 Prest13-69: ×3/回 Prest70以降: ×4/回（最強構成でも時間がかかるように再強化）
 function prestThreshold(){
   const n = G.prestCount;
   let base = 1e12;
   if(n<=12){
     base *= Math.pow(5, n);
-  } else {
+  } else if(n<=70){
     base *= Math.pow(5,12) * Math.pow(3, n-12);
+  } else {
+    base *= Math.pow(5,12) * Math.pow(3, 70-12) * Math.pow(4, n-70);
   }
   return base * (1 - prestCostReduction());
 }
@@ -1482,6 +1576,12 @@ function prestProdMul(){
   if(G.prestCount>=32) mul*=1.5;  // r11b: 大地の怒り
   if(G.prestCount>=45) mul*=1.5;  // r12b: 安寧の境地
   if(G.prestCount>=50) mul*=2.5;  // r13b: 完全なる調和
+  if(G.prestCount>=55) mul*=1.5;  // r14: 月光の祝福
+  if(G.prestCount>=70) mul*=1.3;  // r16: 永劫の試練
+  if(G.prestCount>=75) mul*=1.5;  // r17: 超越の証
+  if(G.prestCount>=80) mul*=2;    // r18: 深層覚醒
+  if(G.prestCount>=90) mul*=1.8;  // r19: 恒星核心
+  if(G.prestCount>=100) mul*=3;   // r20: 創造主の座
   return mul;
 }
 function prestClickMul(){
@@ -1493,11 +1593,16 @@ function prestClickMul(){
   if(G.prestCount>=24) mul*=1.4;  // r8b: 自由の翼
   if(G.prestCount>=45) mul*=1.5;  // r12b: 安寧の境地
   if(G.prestCount>=50) mul*=2.5;  // r13b: 完全なる調和
+  if(G.prestCount>=60) mul*=1.5;  // r15: 加速の境界
+  if(G.prestCount>=75) mul*=1.5;  // r17: 超越の証
+  if(G.prestCount>=90) mul*=1.8;  // r19: 恒星核心
+  if(G.prestCount>=100) mul*=3;   // r20: 創造主の座
   return mul;
 }
 
 function bldgCost(i){ return Math.ceil(BLDGS[i].base*Math.pow(1.15,G.bldg[i])/G.prest*bldgCostMul()); }
 function bldg2Cost(i){ return Math.ceil(BLDGS2[i].base*Math.pow(1.17,G.bldg2[i])/G.prest*bldg2CostMul()); }
+function bldg3Cost(i){ return Math.ceil(BLDGS3[i].base*Math.pow(1.19,G.bldg3[i])/G.prest*bldg3CostMul()); }
 
 // ══ 禁断の果実マーケット（Prest10+専用） ══
 const FORBIDDEN = [
@@ -1629,6 +1734,7 @@ function calcPerSec(){
   let ps=0;
   for(let i=0;i<BLDGS.length;i++) ps+=BLDGS[i].ps*G.bldg[i];
   for(let i=0;i<BLDGS2.length;i++) ps+=BLDGS2[i].ps*G.bldg2[i];
+  for(let i=0;i<BLDGS3.length;i++) ps+=BLDGS3[i].ps*G.bldg3[i];
   let mul=1;
   UPGRADES.filter(u=>u.type==="all"&&G.upg[u.id]).forEach(u=>mul*=u.mul);
   return ps*mul*G.prest*prestProdMul()*fbAllMul()*mythAllMul();
@@ -1752,6 +1858,38 @@ function renderShop2(){
   }
 }
 
+function renderShop3(){
+  const btn=document.getElementById('menu-btn-shop3');
+  if(G.prestCount>=65) btn.classList.add('visible');
+  else { btn.classList.remove('visible'); return; }
+
+  const el=document.getElementById('shop3-items');
+  if(!el) return;
+  el.innerHTML='';
+  let canCount=0;
+  BLDGS3.forEach((b,i)=>{
+    const cost=bldg3Cost(i), can=G.money>=cost, owned=G.bldg3[i];
+    if(can) canCount++;
+    const div=document.createElement('div');
+    div.className='shop3-item '+(can?'s3-can-buy':'s3-cant');
+    const ico=b.name.split(' ')[0];
+    const nm=b.name.slice(b.name.indexOf(' ')+1);
+    div.innerHTML=`
+      <div class="s3-count-badge">${owned}</div>
+      <div class="s3-ico">${ico}</div>
+      <div class="s3-name">${nm}</div>
+      <div class="s3-desc">${b.desc}</div>
+      <div class="s3-cost">💰 ${fmt(cost)}</div>`;
+    if(can) div.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyBldg3(i);});
+    el.appendChild(div);
+  });
+  const badge=document.getElementById('badge-shop3');
+  if(badge){
+    if(canCount>0){ badge.style.display='flex'; badge.textContent=canCount; }
+    else { badge.style.display='none'; }
+  }
+}
+
 // ── アップグレード ──
 function renderUpgrades(){
   const el=document.getElementById('upg-grid');
@@ -1808,7 +1946,7 @@ function renderHUD(){
     document.getElementById('prest-bar').style.width=pct+'%';
     const can=G.money>=thr;
     document.getElementById('prest-info').textContent=
-      can?`転生可能！ボーナス: ×${G.prest+1}`:`必要: 💰 ${fmt(thr)}（現在: ${fmt(G.money)}）`;
+      can?`転生可能！ボーナス: ×${prestBonusFromCount(G.prestCount+1)}`:`必要: 💰 ${fmt(thr)}（現在: ${fmt(G.money)}）`;
     document.getElementById('prest-btn').disabled=!can;
   }
 
@@ -1871,6 +2009,14 @@ function buyBldg2(i){
   const cost=bldg2Cost(i);
   if(G.money<cost) return;
   G.money-=cost; G.bldg2[i]++;
+  G.perSec=calcPerSec();
+  tick_render();
+}
+function buyBldg3(i){
+  if(G.prestCount<65) return;
+  const cost=bldg3Cost(i);
+  if(G.money<cost) return;
+  G.money-=cost; G.bldg3[i]++;
   G.perSec=calcPerSec();
   tick_render();
 }
@@ -1944,11 +2090,27 @@ function startPrestParticles(){
   draw();
 }
 
+// ══ プレステージ基本ボーナス（Prest回数→倍率） ══
+// Prest1-60: +1ずつ（従来通り） Prest61-90: +2ずつ Prest91-120: +3ずつ Prest121以降: +5ずつ
+function prestBonusFromCount(n){
+  if(n<=60) return n+1;
+  let bonus = 61; // n=60時点の値
+  if(n<=90){
+    return bonus + (n-60)*2;
+  }
+  bonus += 30*2; // n=90時点
+  if(n<=120){
+    return bonus + (n-90)*3;
+  }
+  bonus += 30*3; // n=120時点
+  return bonus + (n-120)*5;
+}
+
 function doPrestige(){
   const thr=prestThreshold();
   if(G.money<thr) return;
-  G.prestCount++; G.prest=G.prestCount+1;
-  G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.bldg2=[0,0,0,0,0,0];
+  G.prestCount++; G.prest=prestBonusFromCount(G.prestCount);
+  G.money=0; G.bldg=[0,0,0,0,0,0,0,0,0]; G.bldg2=[0,0,0,0,0,0]; G.bldg3=[0,0,0,0,0,0];
   // _f_ / _m_ プレフィックスの永久アップグレードは転生後も保持
   const fb={}; Object.keys(G.upg).forEach(k=>{if(k.startsWith('_f_')||k.startsWith('_m_')||k==='_auto2_owned') fb[k]=true;});
   G.upg=fb; G.perSec=0;
@@ -2350,11 +2512,14 @@ function renderAuto2Card(){
   const sel = document.getElementById('auto2-target-select');
   sel.innerHTML = '';
 
-  // 候補: アップグレード / 通常施設(各) / 異界施設(各)
+  // 候補: アップグレード / 通常施設(各) / 異界施設(各) / 天空の工房(各)
   const candidates = [{kind:'upgrade', label:'🔧 アップグレード'}];
   BLDGS.forEach((b,i)=> candidates.push({kind:'bldg', i, label:b.name.split(' ')[0]+' '+b.name.slice(b.name.indexOf(' ')+1)}));
   if(G.prestCount>=12){
     BLDGS2.forEach((b,i)=> candidates.push({kind:'bldg2', i, label:b.name.split(' ')[0]+' '+b.name.slice(b.name.indexOf(' ')+1)}));
+  }
+  if(G.prestCount>=65){
+    BLDGS3.forEach((b,i)=> candidates.push({kind:'bldg3', i, label:b.name.split(' ')[0]+' '+b.name.slice(b.name.indexOf(' ')+1)}));
   }
 
   candidates.forEach(c=>{
@@ -2383,7 +2548,8 @@ function renderAuto2Card(){
     let label='';
     if(AUTO2.target.kind==='upgrade') label='🔧 アップグレード';
     else if(AUTO2.target.kind==='bldg') label=BLDGS[AUTO2.target.i].name;
-    else label=BLDGS2[AUTO2.target.i].name;
+    else if(AUTO2.target.kind==='bldg2') label=BLDGS2[AUTO2.target.i].name;
+    else label=BLDGS3[AUTO2.target.i].name;
     statusEl.textContent = `🛰️ ${label} を自動購入中（0.2秒に1回）`;
     statusEl.classList.add('active-pulse');
   }
@@ -2458,10 +2624,13 @@ function tickAutoUpgrade2(){
   } else if(t.kind==='bldg2'){
     const cost = bldg2Cost(t.i);
     if(G.money >= cost){ G.bldg2[t.i]++; G.perSec=calcPerSec(); tick_render(); }
+  } else if(t.kind==='bldg3'){
+    const cost = bldg3Cost(t.i);
+    if(G.money >= cost){ G.bldg3[t.i]++; G.perSec=calcPerSec(); tick_render(); }
   }
 }
 
-function tick_render(){ renderHUD(); renderShop(); renderShop2(); renderUpgrades(); renderRewardCard(); renderAutoCard(); renderAuto2Card(); renderForbiddenMarket(); renderMythMarket(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
+function tick_render(){ renderHUD(); renderShop(); renderShop2(); renderShop3(); renderUpgrades(); renderRewardCard(); renderAutoCard(); renderAuto2Card(); renderForbiddenMarket(); renderMythMarket(); checkMilestones(); applyTheme(); tutRefreshHighlight(); }
 
 // ── ズーム防止（ダブルタップ） ──
 let lastTap=0;
@@ -2492,7 +2661,7 @@ setInterval(()=>{
   tickAutoUpgrade();
   tickAutoUpgrade2();
   renderHUD();
-  if(G.tick%4===0){ renderShop(); renderShop2(); renderUpgrades(); }
+  if(G.tick%4===0){ renderShop(); renderShop2(); renderShop3(); renderUpgrades(); }
   if(G.tick%8===0){ checkMilestones(); renderRewardCard(); renderAutoCard(); renderAuto2Card(); }
 },50);
 </script>
